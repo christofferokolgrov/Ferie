@@ -78,6 +78,7 @@ export function toDealRow(d) {
     accommodation_code: d.accommodationCode,
     departure_date: d.departureDate,
     duration_group: d.durationGroup,
+    pax: d.pax,
     hotel: d.hotel,
     stars: d.stars,
     distance_to_beach: d.distanceToBeach,

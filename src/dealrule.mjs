@@ -23,6 +23,7 @@ export function normalizeProduct(raw, ctx) {
       raw?.AccommodationCode ?? content?.AccommodationCode ?? null,
     departureDate: ctx.departureDate,
     durationGroup: ctx.durationGroup,
+    pax: ctx.pax ?? null,
     hotel: content?.Name ?? raw?.Name ?? null,
     stars: raw?.Classification ?? content?.Classification ?? null,
     distanceToBeach: raw?.DistanceToBeach ?? content?.DistanceToBeach ?? null,
@@ -64,10 +65,11 @@ export function computeDiscount(p) {
 
 /**
  * Stable identity for dedup ("seen" set), per NOTES policy:
- * (operator, accommodationCode, departureDate, duration).
+ * (operator, accommodationCode, departureDate, duration, pax).
+ * pax is included so the same hotel/date alerts once per party configuration.
  */
 export function seenKey(p) {
-  return [p.operator, p.accommodationCode, p.departureDate, p.durationGroup].join('|');
+  return [p.operator, p.accommodationCode, p.departureDate, p.durationGroup, p.pax].join('|');
 }
 
 function num(v) {

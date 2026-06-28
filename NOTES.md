@@ -137,6 +137,26 @@ Full Apollo path is wired end-to-end and unit-tested (22 passing, no network):
 Graceful degradation: missing Supabase env → in-memory store; missing Resend env
 → emails logged not sent. So a local `npm run` works with zero secrets.
 
+## Party configs (paxAges) — LOCKED 2026-06-28
+Sweep runs for THREE party configurations (each independently, since per-person
+price + availability differ by party):
+- `2v`   → 2 adults (`18,18`)
+- `2v2b` → 2 adults + 2 kids 9,12 (`18,18,9,12`)
+- `4v2b` → 4 adults + 2 kids 9,12 (`18,18,18,18,9,12`)
+Deal identity now includes `pax`: `(operator, accommodationCode, departureDate,
+duration, pax)` → same hotel/date alerts once per party. `deals` table gained a
+`pax` column (migration `0002_add_pax.sql` — apply in Supabase). ~3× the BFF
+calls per sweep (~225 /products); workflow timeout bumped to 15 min.
+
+## Live verification — 2026-06-28 ✅
+First green production sweep (single party): `productsSeen=6478 priced=6478
+minPP=3794 qualifying=0`. Confirms: full inventory scanned (~6.5k packages),
+ALL prices parse correctly (normalizeProduct field paths verified against real
+sample), and 0 alerts is CORRECT — cheapest was 3794/pp (> 3000 bar) and best
+discount ~43% (< 70%). System is live on the 30-min cron.
+Note: Apollo exposes `Content.DistanceToCenter`, not `DistanceToBeach` → that
+field is usually null (cosmetic; doesn't affect alerts).
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.
