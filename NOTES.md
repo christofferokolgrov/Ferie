@@ -325,6 +325,18 @@ to origin/main (PRs #14–#16) and aligned both adapters:
 - All 49 unit tests pass; live smoke confirms a real TUI offer → valid `deals`
   row with destination/operator/stars/meal_plan.
 
+## Multi-source pipeline — WIRED 2026-06-28
+`src/sources.mjs` registry + `sweepAllSources()` (resilient: a source that throws
+is logged + skipped, others still run). `run.mjs` now sweeps **all** enabled
+sources (Apollo + Ving + Finn), gated by `FERIE_SOURCES` (default all). sweep.yml
+timeout 15→25 min (two browser sources + Finn). Pre-wire fixes applied to Finn:
+client-side operator allow-list (never store apollo/ving or a missing supplier)
+and a duration guard (drop null/≤0 durations — `deals.duration_group` is NOT NULL,
+one bad offer would otherwise fail the whole batch upsert). 54 tests passing.
+Remaining cleanup (deferred): dedupe `openVingSession`≈`openApolloSession`,
+`joinPlace`×3, `num`; Ving fabricated total + single-cheapest-hotel/seenKey churn;
+remove committed `spikes/ving/package-lock.json`.
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.

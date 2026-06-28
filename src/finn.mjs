@@ -111,6 +111,8 @@ export async function sweepFinn({ todayIso, fetchOffers }) {
   let offersScanned = 0;
   let underBar = 0;
   let outsideHorizon = 0;
+  let skippedOther = 0;
+  let skippedNoDuration = 0;
   let minPricePerPerson = null;
   let failedPages = 0;
   let reachedBar = false;
@@ -137,6 +139,19 @@ export async function sweepFinn({ todayIso, fetchOffers }) {
       underBar += 1;
 
       const p = normalizeFinnOffer(offer);
+      // Only operators we deliberately source via Finn — never apollo/ving (they
+      // have richer direct adapters) and never a missing supplier. Guards against
+      // bundled/related offers Finn might surface beyond the `med=` facet.
+      if (!FINN_OPERATORS.includes(p.operator)) {
+        skippedOther += 1;
+        continue;
+      }
+      // `deals.duration_group` is NOT NULL; an offer with no/zero parseable
+      // duration (null, or '' → 0) would fail or pollute the batch, so drop it.
+      if (p.durationGroup == null || p.durationGroup <= 0) {
+        skippedNoDuration += 1;
+        continue;
+      }
       // Keep to the last-minute horizon (same window as Apollo/Ving).
       if (!p.departureDate || p.departureDate < todayIso || p.departureDate > horizonEnd) {
         outsideHorizon += 1;
@@ -163,6 +178,8 @@ export async function sweepFinn({ todayIso, fetchOffers }) {
       offersScanned,
       underBar,
       outsideHorizon,
+      skippedOther,
+      skippedNoDuration,
       minPricePerPerson,
       qualifying: deals.length,
     },

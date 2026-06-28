@@ -119,6 +119,34 @@ test('sweepFinn applies tiered bars (4★ up to 4500), gates horizon, stops at t
   assert.equal(stats.minPricePerPerson, 2990);
 });
 
+test('sweepFinn skips offers from non-Finn operators (never apollo/ving) and missing supplier', async () => {
+  const page1 = {
+    currentPage: 1, totalPages: 1,
+    offers: [
+      mk({ price: '2990', hotelName: 'Real TUI', supplier: 'tui', outboundDepartureTime: '2026-07-10T00:00:00' }),
+      mk({ price: '2991', hotelName: 'Bundled Apollo', supplier: 'apollo', outboundDepartureTime: '2026-07-10T00:00:00' }),
+      mk({ price: '2992', hotelName: 'No Supplier', supplier: undefined, outboundDepartureTime: '2026-07-10T00:00:00' }),
+    ],
+  };
+  const { deals, stats } = await sweepFinn({ todayIso: '2026-06-28', fetchOffers: pagedFetch([page1]) });
+  assert.deepEqual(deals.map((d) => d.hotel), ['Real TUI']);
+  assert.equal(stats.skippedOther, 2);
+});
+
+test('sweepFinn drops offers with no parseable duration (duration_group is NOT NULL)', async () => {
+  const page1 = {
+    currentPage: 1, totalPages: 1,
+    offers: [
+      mk({ price: '2990', hotelName: 'Has Duration', duration: '7', outboundDepartureTime: '2026-07-10T00:00:00' }),
+      mk({ price: '2991', hotelName: 'No Duration', duration: '', outboundDepartureTime: '2026-07-10T00:00:00' }),
+    ],
+  };
+  const { deals, stats } = await sweepFinn({ todayIso: '2026-06-28', fetchOffers: pagedFetch([page1]) });
+  assert.deepEqual(deals.map((d) => d.hotel), ['Has Duration']);
+  assert.equal(stats.skippedNoDuration, 1);
+  assert.ok(deals.every((d) => Number.isInteger(d.durationGroup)));
+});
+
 test('sweepFinn returns nothing when the cheapest is already over the top tier', async () => {
   // ★2.5 at 4393 → base bar (3500), doesn't qualify; but it's < 4500 stop bar so
   // we keep scanning; the 4600 then trips the stop. Nothing under its tier here.
