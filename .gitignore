@@ -12,3 +12,6 @@ playwright-report/
 test-results/
 .vercel
 .supabase/
+
+# Spike scratch dirs: never commit their lockfiles
+spikes/**/package-lock.json

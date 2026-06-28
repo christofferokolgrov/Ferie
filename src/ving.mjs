@@ -33,7 +33,8 @@ import {
   CF_SETTLE_MS,
 } from './config.mjs';
 import { sweepWindow } from './dates.mjs';
-import { evaluateDeal, seenKey } from './dealrule.mjs';
+import { evaluateDeal, seenKey, joinDestination } from './dealrule.mjs';
+import { launchClearedContext, withRetry } from './browser.mjs';
 
 // ---------------------------------------------------------------------------
 // Query body builder (pure) — mutate the captured page template's arg values.
@@ -91,17 +92,27 @@ export function cheapestPackageOffer(node) {
   return pkg.reduce((min, o) => (o.price < min.price ? o : min));
 }
 
+/**
+ * One package offer per DISTINCT hotel on a node (cheapest variant of each).
+ * A trip node can list several hotels; surfacing each as its own deal avoids
+ * dropping hotels and keeps the dedup key (hotelCode) stable across runs
+ * instead of churning to whichever hotel is momentarily cheapest.
+ */
+export function packageOffersByHotel(node) {
+  const byHotel = new Map();
+  for (const o of node?.offers ?? []) {
+    if (String(o?.type).toLowerCase() !== 'specified' || o?.price == null) continue;
+    const code = o.hotelCode ?? null;
+    const cur = byHotel.get(code);
+    if (!cur || o.price < cur.price) byHotel.set(code, o);
+  }
+  return [...byHotel.values()];
+}
+
 // ---------------------------------------------------------------------------
 // Normalization → the shared deal shape (same field names as Apollo's
 // normalizeProduct, so storage/email/dashboard treat all sources uniformly).
 // ---------------------------------------------------------------------------
-
-/** Join "country – place", dropping blanks/dupes (e.g. "Bulgaria – Varna"). */
-function joinPlace(country, place) {
-  const parts = [country, place].map((s) => (s ?? '').trim()).filter(Boolean);
-  const uniq = [...new Set(parts)];
-  return uniq.length ? uniq.join(' – ') : null;
-}
 
 /**
  * @param {object} node   one trip node from the GraphQL response
@@ -123,15 +134,16 @@ export function normalizeVingTrip(node, offer, pax) {
       ? `${node.destinationAirport}${offer?.hotelCode ? ` (${offer.hotelCode})` : ''}`
       : offer?.hotelCode ?? null,
     // "country – place", e.g. "Bulgaria – Varna" (matches the dashboard column).
-    destination: joinPlace(geo?.country?.name, node?.destinationAirport),
+    destination: joinDestination(geo?.country?.name, node?.destinationAirport),
     mealPlan: null, // Ving's restplass list exposes no board basis
     stars: null, // not exposed by the restplass list (so Ving uses the base price tier only)
     distanceToBeach: null,
     availability: node?.numFreeSeats ?? null, // free seats on the trip
     currentPricePerPerson: perPerson,
-    // Ving exposes only per-person price; mirror Ving's own total convention
-    // (per-person × headcount — same arithmetic it uses for the booking link).
-    currentPrice: perPerson != null ? perPerson * pax.size : null,
+    // Ving exposes ONLY a per-person price (party-independent); it never quotes a
+    // party total, so don't fabricate one — leave currentPrice null (the
+    // dashboard shows "total –" rather than a number Ving wouldn't honor).
+    currentPrice: null,
     brochurePrice: null, // no list price → no discount possible for Ving
     brochurePricePerPerson: null,
     // Identifiers for the booking deep-link.
@@ -227,22 +239,23 @@ export async function sweepVing({ todayIso, template, fetchTrips }) {
   for (const node of nodes) {
     tripsSeen += 1;
     if (sampleRaw === null) sampleRaw = node;
-    const offer = cheapestPackageOffer(node);
-    if (!offer) continue; // flight-only / no package offer
-    packagesSeen += 1;
-    if (offer.price != null) {
-      priced += 1;
-      if (minPricePerPerson === null || offer.price < minPricePerPerson) {
-        minPricePerPerson = offer.price;
+    // Each distinct hotel on the node is its own deal (stable per-hotel key).
+    for (const offer of packageOffersByHotel(node)) {
+      packagesSeen += 1;
+      if (offer.price != null) {
+        priced += 1;
+        if (minPricePerPerson === null || offer.price < minPricePerPerson) {
+          minPricePerPerson = offer.price;
+        }
       }
-    }
-    for (const pax of VING_PAX_CONFIGS) {
-      // Capacity gate: the trip must seat the whole party.
-      if ((node?.numFreeSeats ?? 0) < pax.size) continue;
-      const p = normalizeVingTrip(node, offer, pax);
-      const evalResult = evaluateDeal(p);
-      if (evalResult.qualifies) {
-        deals.push({ ...p, ...evalResult, key: seenKey(p), bookingUrl: buildVingBookingUrl(p) });
+      for (const pax of VING_PAX_CONFIGS) {
+        // Capacity gate: the trip must seat the whole party.
+        if ((node?.numFreeSeats ?? 0) < pax.size) continue;
+        const p = normalizeVingTrip(node, offer, pax);
+        const evalResult = evaluateDeal(p);
+        if (evalResult.qualifies) {
+          deals.push({ ...p, ...evalResult, key: seenKey(p), bookingUrl: buildVingBookingUrl(p) });
+        }
       }
     }
   }
@@ -281,21 +294,10 @@ export async function sweepVing({ todayIso, template, fetchTrips }) {
  * a template, and return { template, fetchTrips, close }.
  */
 export async function openVingSession() {
-  const { chromium } = await import('playwright');
-  const browser = await chromium.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'],
-  });
-  const ctx = await browser.newContext({
+  const { browser, page } = await launchClearedContext({
     userAgent: USER_AGENT,
-    locale: 'nb-NO',
-    timezoneId: 'Europe/Oslo',
     viewport: { width: 1366, height: 900 },
   });
-  await ctx.addInitScript(() =>
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined }),
-  );
-  const page = await ctx.newPage();
 
   let template = null;
   page.on('request', (r) => {
@@ -331,18 +333,11 @@ export async function openVingSession() {
 
   // The first in-page call after load is flaky ("Failed to fetch"); retry with
   // backoff (also covers transient network blips during the sweep).
-  const fetchTrips = async (body, attempts = 4) => {
-    let lastErr;
-    for (let i = 0; i < attempts; i++) {
-      try {
-        return await callOnce(body);
-      } catch (err) {
-        lastErr = err;
-        if (i < attempts - 1) await page.waitForTimeout(800 * 2 ** i);
-      }
-    }
-    throw lastErr;
-  };
+  const fetchTrips = withRetry(callOnce, {
+    attempts: 4,
+    baseMs: 800,
+    sleep: (ms) => page.waitForTimeout(ms),
+  });
 
   return { template, fetchTrips, close: () => browser.close() };
 }
