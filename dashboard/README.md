@@ -15,7 +15,20 @@ read policy needed).
 4. Add Environment Variables (same values as the GitHub Actions secrets):
    - `SUPABASE_URL`
    - `SUPABASE_SERVICE_ROLE_KEY`
+   - `GH_DISPATCH_TOKEN` — for the **Run screening now** button (see below).
 5. Deploy. The dashboard reads live data on each request (`force-dynamic`).
+
+## "Run screening now" button
+
+Triggers the `sweep.yml` GitHub Actions workflow on demand (`workflow_dispatch`)
+via a server action — the token stays server-side, never in the browser.
+
+Create a **fine-grained Personal Access Token** (GitHub → Settings → Developer
+settings → Fine-grained tokens): scope it to the `Ferie` repo, permission
+**Actions: Read and write**. Add it to Vercel as `GH_DISPATCH_TOKEN`.
+
+> Note: the button is **unauthenticated** — anyone with the dashboard URL can
+> trigger a sweep. Add Vercel password protection if that becomes a problem.
 
 ## Local dev
 

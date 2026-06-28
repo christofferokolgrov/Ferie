@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import RunButton from './RunButton';
 
 // Always fetch fresh on each request (low traffic; we want current deals).
 export const dynamic = 'force-dynamic';
@@ -64,6 +65,7 @@ export default async function Page() {
           {deals.length} qualifying deal{deals.length === 1 ? '' : 's'} (under 3000 kr/pp or ≥70% off)
           {lastUpdated ? ` · last sweep ${fmtSeen(lastUpdated)}` : ''}
         </div>
+        <RunButton />
       </header>
 
       {error ? (
@@ -97,7 +99,13 @@ export default async function Page() {
                   <tr key={d.key} className={stale ? 'stale' : undefined}>
                     <td className="hotel">
                       <div className="name">
-                        {d.hotel ?? d.accommodation_code ?? 'Unknown'}
+                        {d.booking_url ? (
+                          <a className="hotel-link" href={d.booking_url} target="_blank" rel="noreferrer">
+                            {d.hotel ?? d.accommodation_code ?? 'Unknown'}
+                          </a>
+                        ) : (
+                          d.hotel ?? d.accommodation_code ?? 'Unknown'
+                        )}
                         {d.stars ? ` ★${d.stars}` : ''}
                       </div>
                     </td>
