@@ -1,10 +1,16 @@
 # Ferie 🏖️
 
 A personal monitor for **restplasser** (leftover last-minute package-holiday seats)
-departing **Oslo (OSL)** from **Apollo**, **TUI**, and **Ving**.
+departing **Oslo (OSL)** from **Apollo**, **Ving**, and **TUI**.
 
 It polls the operators on a schedule, filters for genuinely cheap deals, emails
 when a good one appears, and surfaces current deals on a dashboard.
+
+Sources run via a resilient registry (`src/sources.mjs`) — each sweep runs every
+enabled source independently; one failing source never blocks the others. Select
+with `FERIE_SOURCES=apollo,ving,tui` (default: all). Apollo is fully proven; Ving
+and TUI capture the sites' own search responses, with their exact field mapping
+finalized from CI capture logs.
 
 > Personal-use project. No public API exists for these operators, so data is
 > obtained by scraping their public `restplasser` pages.
