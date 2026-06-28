@@ -15,8 +15,10 @@
 // Because lead-time eligibility shrinks every day, coupons are computed at
 // DISPLAY time (email send / dashboard render) and never stored.
 //
-// Operator mapping comes from research (see NOTES.md "Membership coupons"):
-//   apollo → OBOS, Studentpakken, Trumf      tui → NAF, Trumf      ving → (none yet)
+// Operator mapping (per owner decision, 2026-06-28):
+//   apollo → OBOS, Studentpakken      tui → NAF, Trumf      ving → Coop
+// Coop's exact discount figure is not yet known, so it's modelled as a
+// label-only `flag` (no kr estimate — honest, no fabricated number).
 
 export const COUPONS = [
   {
@@ -49,16 +51,25 @@ export const COUPONS = [
   {
     id: 'trumf',
     label: 'Trumf',
-    operators: ['apollo', 'tui'],
+    operators: ['tui'],
     type: 'cashback_pct', // 1% within 120 days of departure (3% if booked earlier)
     amount: 0.01,
     minDaysBefore: 0,
     note: '1 % bonus (3 % hvis >120 dager før avreise)',
   },
+  {
+    id: 'coop',
+    label: 'Coop',
+    operators: ['ving'],
+    type: 'flag', // amount/type not yet confirmed — surfaced as a label-only hint
+    amount: null,
+    minDaysBefore: 0,
+    note: 'Coop-medlemsrabatt (beløp ikke bekreftet)',
+  },
 ];
 
 // Headcount per stored party key, with a fallback to counting paxAges ("18,18,9,12").
-export const PAX_HEADCOUNT = { '2v': 2, '2v2b': 4, '4v2b': 6 };
+export const PAX_HEADCOUNT = { '2v': 2, '4v': 4, '2v2b': 4, '4v2b': 6 };
 
 export function headcount({ pax, paxAges } = {}) {
   if (pax && PAX_HEADCOUNT[pax] != null) return PAX_HEADCOUNT[pax];

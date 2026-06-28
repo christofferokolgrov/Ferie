@@ -67,10 +67,11 @@ export const COUPONS = [
   { id: 'obos', label: 'OBOS', operators: ['apollo'], type: 'per_person', amount: 350, minDaysBefore: 30 },
   { id: 'studentpakken', label: 'Studentpakken', operators: ['apollo'], type: 'per_booking', amount: 750, minDaysBefore: 30 },
   { id: 'naf', label: 'NAF', operators: ['tui'], type: 'per_person', amount: 600, minDaysBefore: 30 },
-  { id: 'trumf', label: 'Trumf', operators: ['apollo', 'tui'], type: 'cashback_pct', amount: 0.01, minDaysBefore: 0 },
+  { id: 'trumf', label: 'Trumf', operators: ['tui'], type: 'cashback_pct', amount: 0.01, minDaysBefore: 0 },
+  { id: 'coop', label: 'Coop', operators: ['ving'], type: 'flag', amount: null, minDaysBefore: 0 },
 ];
 
-const PAX_HEADCOUNT = { '2v': 2, '2v2b': 4, '4v2b': 6 };
+const PAX_HEADCOUNT = { '2v': 2, '4v': 4, '2v2b': 4, '4v2b': 6 };
 
 function headcount(d) {
   if (d.pax && PAX_HEADCOUNT[d.pax] != null) return PAX_HEADCOUNT[d.pax];
