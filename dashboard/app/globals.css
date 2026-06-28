@@ -37,6 +37,9 @@ h1 { font-size: 22px; margin: 0 0 4px; }
 table { width: 100%; border-collapse: collapse; min-width: 820px; }
 th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
 th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--text); }
+th[aria-sort] { color: var(--accent); }
 tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: rgba(255,255,255,.02); }
 
@@ -53,6 +56,12 @@ tbody tr:hover { background: rgba(255,255,255,.02); }
   font-size: 12px; font-weight: 600;
 }
 .badge.disc { background: rgba(240,169,59,.15); color: var(--warn); }
+.badge.new { background: var(--good); color: #04221a; font-size: 10px; padding: 1px 6px; vertical-align: middle; }
+.badge.src { background: rgba(255,255,255,.07); color: var(--muted); font-weight: 600; }
+.badge.src-apollo { color: #7fb2ff; }
+.badge.src-ving { color: #43c59e; }
+.badge.src-tui { color: #f0a93b; }
+.save { color: var(--good); font-weight: 600; }
 
 .book {
   display: inline-block; padding: 5px 12px; border-radius: 8px;
