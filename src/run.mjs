@@ -1,8 +1,8 @@
-// Production entrypoint — wires the real adapter, store and mailer from env,
-// then runs one sweep→dedup→email pass. This is what the GitHub Actions cron
-// invokes every 30 minutes (`node src/run.mjs`).
+// Production entrypoint — wires the sources, store and mailer from env, then runs
+// one sweep→dedup→email pass across ALL enabled sources. This is what the GitHub
+// Actions cron invokes every 15 minutes (`node src/run.mjs`).
 
-import { runApollo } from './apollo.mjs';
+import { sweepAllSources } from './sources.mjs';
 import { createStoreFromEnv } from './storage.mjs';
 import { createMailerFromEnv } from './email.mjs';
 import { runPipeline } from './pipeline.mjs';
@@ -14,7 +14,7 @@ async function main() {
   ]);
 
   const result = await runPipeline({
-    sweep: () => runApollo(),
+    sweep: () => sweepAllSources(),
     store,
     mailer,
   });

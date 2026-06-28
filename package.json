@@ -7,6 +7,8 @@
   "scripts": {
     "test": "node --test",
     "sweep:apollo": "node src/apollo.mjs",
+    "sweep:ving": "node src/ving.mjs",
+    "sweep:finn": "node src/finn.mjs",
     "run": "node src/run.mjs"
   },
   "dependencies": {
