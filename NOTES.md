@@ -28,9 +28,30 @@ Plain `curl` (Chrome UA) from this datacenter IP:
 Pushes the scraper to Playwright-in-a-container (not edge/serverless), Supabase
 as DB + cron, Vercel as read-only dashboard only.
 
+## Apollo spike — RESOLVED 2026-06-28 ✅
+Ran Playwright (headless chromium) from this datacenter container:
+- **Cloudflare challenge is cleared by a plain headless browser** — NO residential
+  proxy needed. Free approach (A) is viable. (Naked curl still 403s everywhere.)
+- Real listings page: `https://www.apollo.no/restplasser` (200, prices render).
+- **Apollo has a clean, unauthenticated JSON BFF** at `bff.apollo.no`:
+  - `POST /product-list/v1/sales-unit/apollono/core/departures/cheapest`
+    `?durationGroup=7&departureAirportCode=OSL&startDate=…&endDate=…&paxAges=18,18`
+    body `{"IncludeExternalFlights":false,"IncludeBedbankAccommodations":false,
+    "SearchSpanStartDate":"…","SearchSpanEndDate":"…"}`
+    → `{"Departures":[{"DepartureDate","Price","PricePerPerson"}], ...}`
+  - also `/core/products`, `/filter`, `/departure-airports/OSL/duration-groups`
+  - **No auth header / api-key / token.** `departureAirportCode=OSL` is a param.
+- **BUT `bff.apollo.no` is ALSO behind the same Cloudflare challenge** — naked curl
+  to it gets 403 cf=challenge. The browser reaches it via the `cf_clearance` cookie.
+- **Winning pattern (confirmed working):** drive a cleared Playwright browser, then
+  call the BFF JSON ourselves via in-page `fetch()` for arbitrary OSL/date queries.
+  Returns structured JSON — no HTML parsing.
+
+**Architectural consequence:** scraper MUST be Playwright-in-a-container (not edge/
+serverless), since even the JSON API needs browser-obtained CF clearance. Confirms
+the container-runner decision; kills the "Supabase Edge Function scrapes" variant.
+
 ## Open questions (next grilling branches)
-- [ ] Apollo: can Playwright-stealth from a container clear the CF challenge, or
-      is a residential proxy needed? (spike required)
 - [ ] What defines a "good" deal? (absolute price? price/person? % below a
       baseline? per-destination thresholds?)
 - [ ] Which destinations/dates in scope, or all?
