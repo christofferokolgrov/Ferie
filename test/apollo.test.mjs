@@ -1,0 +1,74 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import {
+  buildCheapestUrl,
+  buildProductsUrl,
+  extractDepartureDates,
+  extractProducts,
+  sweepApollo,
+} from '../src/apollo.mjs';
+
+test('buildCheapestUrl carries the locked OSL params', () => {
+  const u = buildCheapestUrl({ durationGroup: 7, startDate: '2026-06-28', endDate: '2026-08-12' });
+  assert.match(u, /departures\/cheapest\?/);
+  assert.match(u, /departureAirportCode=OSL/);
+  assert.match(u, /durationGroup=7/);
+  assert.match(u, /startDate=2026-06-28/);
+  assert.match(u, /endDate=2026-08-12/);
+});
+
+test('buildProductsUrl targets a single departure date', () => {
+  const u = buildProductsUrl({ durationGroup: 14, departureDate: '2026-07-10' });
+  assert.match(u, /\/products\?/);
+  assert.match(u, /departureDate=2026-07-10/);
+  assert.match(u, /durationGroup=14/);
+});
+
+test('extractDepartureDates dedupes + sorts actual departure days', () => {
+  const json = {
+    Departures: [
+      { DepartureDate: '2026-07-10T00:00:00', PricePerPerson: 4000 },
+      { DepartureDate: '2026-07-03T00:00:00', PricePerPerson: 2800 },
+      { DepartureDate: '2026-07-10T00:00:00', PricePerPerson: 4200 },
+    ],
+  };
+  assert.deepEqual(extractDepartureDates(json), ['2026-07-03', '2026-07-10']);
+});
+
+test('extractProducts handles array and wrapped shapes', () => {
+  assert.deepEqual(extractProducts([{ a: 1 }]), [{ a: 1 }]);
+  assert.deepEqual(extractProducts({ Products: [{ a: 2 }] }), [{ a: 2 }]);
+  assert.deepEqual(extractProducts({}), []);
+});
+
+test('sweepApollo: two-stage flow, only real departure dates hit /products', async () => {
+  const calls = [];
+  // Fake BFF: cheapest returns 1 date for dg7, 1 for dg14; products returns
+  // one qualifying + one non-qualifying product per date.
+  const fetchJson = async (url) => {
+    calls.push(url);
+    if (url.includes('/cheapest')) {
+      const dg = url.match(/durationGroup=(\d+)/)[1];
+      const date = dg === '7' ? '2026-07-03' : '2026-07-17';
+      return { Departures: [{ DepartureDate: `${date}T00:00:00`, PricePerPerson: 2500 }] };
+    }
+    return {
+      Products: [
+        { AccommodationCode: 'CHEAP', Content: { Name: 'Sol' }, Price: { CurrentPrice: 5000, CurrentPricePerPerson: 2500, BrochurePrice: 5200 } },
+        { AccommodationCode: 'PRICEY', Content: { Name: 'Lux' }, Price: { CurrentPrice: 12000, CurrentPricePerPerson: 6000, BrochurePrice: 13000 } },
+      ],
+    };
+  };
+
+  const { deals, stats } = await sweepApollo({ todayIso: '2026-06-28', fetchJson });
+
+  // 2 cheapest calls + 2 products calls (one real date per duration).
+  assert.equal(calls.filter((u) => u.includes('/cheapest')).length, 2);
+  assert.equal(stats.productCalls, 2);
+  assert.equal(stats.qualifying, 2); // one CHEAP per duration
+  assert.ok(deals.every((d) => d.accommodationCode === 'CHEAP'));
+  assert.deepEqual([...new Set(deals.map((d) => d.key))].sort(), [
+    'apollo|CHEAP|2026-07-03|7',
+    'apollo|CHEAP|2026-07-17|14',
+  ]);
+});
