@@ -51,11 +51,53 @@ Ran Playwright (headless chromium) from this datacenter container:
 serverless), since even the JSON API needs browser-obtained CF clearance. Confirms
 the container-runner decision; kills the "Supabase Edge Function scrapes" variant.
 
-## Open questions (next grilling branches)
-- [ ] What defines a "good" deal? (absolute price? price/person? % below a
-      baseline? per-destination thresholds?)
-- [ ] Which destinations/dates in scope, or all?
-- [ ] Dedup / "seen" semantics — notify once per deal, or again on price drop?
-- [ ] Poll frequency.
-- [ ] Email: Resend vs M365 SMTP.
-- [ ] GitHub: account, repo visibility, auth method.
+## Deal rule (v1) — LOCKED 2026-06-28
+Email if EITHER:
+- `CurrentPricePerPerson < 3000` (NOK), OR
+- discount `1 - CurrentPrice/BrochurePrice >= 0.70`
+
+Data source: Apollo `/products` endpoint exposes both, per departure date:
+`Price: { CurrentPrice, CurrentPricePerPerson, BrochurePrice,
+BrochurePricePerPerson, ShowDiscount }`. The lightweight `cheapest` calendar does
+NOT carry BrochurePrice → must hit `/products` per date to evaluate the % rule.
+Also available per product: Content.Name (hotel), Classification (stars),
+DistanceToBeach, MealPlans, Availability (seats left), lat/long, AccommodationCode.
+
+Caveat: BrochurePrice is the operator's own list price and can be inflated; the
+absolute <3000/pp rule is trustworthy, 70%-off is a softer "look at this" flag.
+
+## Notification policy (v1) — LOCKED 2026-06-28
+Notify IMMEDIATELY, as soon as a qualifying deal is first noticed (real-time
+per-deal email; no daily digest). Keep a "seen" record to avoid re-emailing the
+same deal on every poll. Deal identity key:
+`(operator, accommodationCode, departureDate, duration)`.
+v1 = notify once per newly-seen qualifying deal (simple A). Re-notify-on-price-drop
+deferred to later.
+
+## ===== RESUME HERE (next session) =====
+### Decisions locked so far
+1. Scraping only; no API exists. Personal use.
+2. First source: **Apollo** — feasibility SOLVED (see Apollo spike above).
+   Pattern: Playwright (headless, container, NO proxy) clears Cloudflare, then
+   call clean JSON BFF via in-page fetch. Working spike code in `spikes/apollo/`.
+3. Deal rule: email if `CurrentPricePerPerson < 3000` OR discount >= 70%.
+4. Notify immediately on first sighting; dedup via seen-key.
+5. Stack instinct: Playwright-in-a-container (Render ~$1/mo or existing Lightsail)
+   + Supabase (DB + cron) + Vercel (read-only dashboard). Edge/serverless-scrape
+   ruled out (CF needs a real browser).
+6. GitHub: private repo christofferokolgrov/Ferie, pushed.
+
+### Still open (next grilling branches)
+- [ ] Poll frequency (how often the container sweep runs).
+- [ ] OSL sweep scope: which durations / how far ahead (90 days?) / all destinations.
+- [ ] Email transport: Resend free tier vs Microsoft 365 SMTP.
+- [ ] DB schema: deals table + seen table (fields from /products: name, stars,
+      beach dist, availability, prices).
+- [ ] Where the scraper actually runs (Render vs Lightsail) + how it's triggered.
+- [ ] Dashboard scope (what to show; auth needed or just private URL?).
+- [ ] Then: replicate for Ving (JS-rendered, /websearchresult) and TUI (Akamai —
+      hardest, may need proxy).
+
+### Next action
+Continue the grilling on poll frequency + sweep scope, then start building the
+Apollo adapter from `spikes/apollo/inpage.mjs`.
