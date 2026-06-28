@@ -1,18 +1,18 @@
 :root {
-  --bg: #f5f6f8;
+  --bg: #e9ebef;            /* softer, less glaring than near-white */
   --surface: #ffffff;
-  --surface-2: #fbfcfd;
-  --line: #e6e8ec;
-  --line-strong: #d6d9df;
-  --text: #1d2126;
-  --muted: #687079;
-  --faint: #99a0a8;
-  --accent: #2f6df6;
-  --accent-soft: #eaf1ff;
-  --good: #0a8f5b;
-  --good-soft: #e7f6ee;
-  --warn: #b26a00;
-  --warn-soft: #fdf1dd;
+  --surface-2: #f6f7f9;
+  --line: #e1e4e9;
+  --line-strong: #cfd4db;
+  --text: #232830;
+  --muted: #6b727b;
+  --faint: #9aa1a9;
+  --accent: #3a66c4;        /* calmer blue */
+  --accent-soft: #eaf0fb;
+  --good: #2f7d57;          /* muted green, not neon */
+  --good-soft: #e9f2ec;
+  --warn: #94652a;          /* muted amber */
+  --warn-soft: #f4ecdd;
   --radius: 14px;
   --shadow: 0 1px 2px rgba(16,24,40,.04), 0 1px 3px rgba(16,24,40,.06);
   --shadow-lift: 0 4px 12px rgba(16,24,40,.08), 0 2px 4px rgba(16,24,40,.05);
@@ -98,7 +98,8 @@ main { max-width: 1180px; margin: 0 auto; padding: 36px 20px 80px; }
 
 .price { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .pp { font-size: 25px; font-weight: 750; letter-spacing: -0.02em; color: var(--text); }
-.pp.cheap { color: var(--good); }
+/* keep the price neutral/dark — no neon. "good" signal lives in the badges. */
+.pp.cheap { color: var(--text); }
 .per { color: var(--faint); font-size: 13px; margin-left: -4px; }
 .disc { background: var(--warn-soft); color: var(--warn); font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
 .new { background: var(--good-soft); color: var(--good); font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px; letter-spacing: .03em; }
@@ -110,6 +111,13 @@ main { max-width: 1180px; margin: 0 auto; padding: 36px 20px 80px; }
 .facts dt { color: var(--faint); font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
 .facts dd { margin: 2px 0 0; font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; }
 .facts dd.low { color: var(--warn); font-weight: 600; }
+
+/* ---- stackable membership coupons ---- */
+.coupons { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 11px; border-top: 1px dashed var(--line-strong); }
+.coupons-label { width: 100%; color: var(--faint); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; font-weight: 600; }
+.coupons-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.coupon { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; font-size: 12px; font-weight: 500; }
+.coupons-net { margin-left: auto; color: var(--good); font-size: 12px; font-weight: 600; }
 
 .card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; padding-top: 2px; }
 .seen { color: var(--faint); font-size: 12px; }
