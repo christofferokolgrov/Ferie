@@ -1,7 +1,7 @@
 // Locked sweep parameters for the Apollo adapter.
 // Decisions made in the design grilling (see NOTES.md):
 //   - Poll every 30 min (cron concern; documented here for reference)
-//   - Horizon: ~45 days ahead
+//   - Horizon: ~50 days ahead
 //   - Durations: 1 week (7) and 2 weeks (14)
 //   - Deal rule: CurrentPricePerPerson < 3000 OR discount >= 70%
 
@@ -14,7 +14,7 @@ export const DEPARTURE_AIRPORT = 'OSL';
 export const DURATION_GROUPS = [7, 14];
 
 // How far ahead each sweep looks for departures.
-export const HORIZON_DAYS = 45;
+export const HORIZON_DAYS = 50;
 
 // Party configurations to sweep. paxAges is Apollo's comma-separated age list
 // (18 = adult). Each party is searched independently (its per-person price and
