@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildCheapestUrl,
   buildProductsUrl,
+  buildBookingUrl,
   extractDepartureDates,
   extractProducts,
   sweepApollo,
@@ -33,6 +34,28 @@ test('extractDepartureDates dedupes + sorts actual departure days', () => {
     ],
   };
   assert.deepEqual(extractDepartureDates(json), ['2026-07-03', '2026-07-10']);
+});
+
+test('buildBookingUrl builds a deep link from product identifiers', () => {
+  const url = buildBookingUrl({
+    paxAges: '18,18,9,12',
+    departureDate: '2026-08-15',
+    durationGroup: 14,
+    accommodationUri: 'der:accommodation:dtno:1250144',
+    productId: 'ODtQabc123',
+  });
+  assert.match(url, /booking-guide\/core\/select-unit-and-meal\?/);
+  assert.match(url, /departureAirportCode=OSL/);
+  assert.match(url, /paxAges=18%2C18%2C9%2C12/);
+  assert.match(url, /departureDate=2026-08-15/);
+  assert.match(url, /duration=14/);
+  assert.match(url, /accommodationUri=der%3Aaccommodation%3Adtno%3A1250144/);
+  assert.match(url, /productId=ODtQabc123/);
+  assert.match(url, /searchProductCategoryCodes=FlightAndHotel/);
+});
+
+test('buildBookingUrl returns null when identifiers are missing', () => {
+  assert.equal(buildBookingUrl({ paxAges: '18,18', departureDate: '2026-08-15', durationGroup: 7 }), null);
 });
 
 test('extractProducts handles array and wrapped shapes', () => {

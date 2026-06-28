@@ -36,6 +36,28 @@ export function buildProductsUrl({ durationGroup, departureDate, paxAges }) {
   return `${BFF_BASE}/products?${q}`;
 }
 
+const BOOKING_BASE =
+  'https://www.apollo.no/booking-guide/core/select-unit-and-meal';
+
+/**
+ * Deep-link into Apollo's booking flow for a normalized deal. Returns null if
+ * the identifiers needed for a working link are missing.
+ */
+export function buildBookingUrl(p) {
+  if (!p.productId || !p.accommodationUri || !p.paxAges) return null;
+  const q = new URLSearchParams({
+    departureAirportCode: DEPARTURE_AIRPORT,
+    paxAges: p.paxAges,
+    departureDate: p.departureDate,
+    duration: String(p.durationGroup),
+    accommodationUri: p.accommodationUri,
+    productId: p.productId,
+    searchProductCategoryCodes: 'FlightAndHotel',
+  });
+  if (p.travelAreaUri) q.set('travelAreaUri', p.travelAreaUri);
+  return `${BOOKING_BASE}?${q}`;
+}
+
 function spanBody({ startDate, endDate }) {
   return {
     IncludeExternalFlights: false,
@@ -143,7 +165,7 @@ export async function sweepApollo({ todayIso, fetchJson }) {
         for (const raw of extractProducts(productsJson)) {
           if (sampleRaw === null) sampleRaw = raw;
           productsSeen += 1;
-          const p = normalizeProduct(raw, { departureDate, durationGroup, pax: pax.key });
+          const p = normalizeProduct(raw, { departureDate, durationGroup, pax: pax.key, paxAges: pax.paxAges });
           if (p.currentPricePerPerson != null) {
             priced += 1;
             if (minPricePerPerson === null || p.currentPricePerPerson < minPricePerPerson) {
@@ -152,7 +174,7 @@ export async function sweepApollo({ todayIso, fetchJson }) {
           }
           const evalResult = evaluateDeal(p);
           if (evalResult.qualifies) {
-            deals.push({ ...p, ...evalResult, key: seenKey(p) });
+            deals.push({ ...p, ...evalResult, key: seenKey(p), bookingUrl: buildBookingUrl(p) });
           }
         }
       }

@@ -32,13 +32,20 @@ export function formatDealEmail(deals) {
       ? `🏖️ Restplass: ${deals[0].hotel ?? 'deal'} — ${NOK(deals[0].currentPricePerPerson)}/pp`
       : `🏖️ ${n} restplasser fra OSL — fra ${NOK(cheapest)}/pp`;
 
-  const lines = deals.map((d) => formatDealLine(d));
-  const text = [`${n} new qualifying deal${n === 1 ? '' : 's'} from Oslo:`, '', ...lines.map((l) => `• ${l}`)].join('\n');
+  const text = [
+    `${n} new qualifying deal${n === 1 ? '' : 's'} from Oslo:`,
+    '',
+    ...deals.map((d) => `• ${formatDealLine(d)}${d.bookingUrl ? `\n  ${d.bookingUrl}` : ''}`),
+  ].join('\n');
 
   const items = deals
-    .map(
-      (d) => `<li style="margin:0 0 10px">${escapeHtml(formatDealLine(d))}</li>`,
-    )
+    .map((d) => {
+      const line = escapeHtml(formatDealLine(d));
+      const link = d.bookingUrl
+        ? ` <a href="${escapeHtml(d.bookingUrl)}">Book on Apollo →</a>`
+        : '';
+      return `<li style="margin:0 0 10px">${line}${link}</li>`;
+    })
     .join('');
   const html = `<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.5">
   <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo (Apollo):</p>
