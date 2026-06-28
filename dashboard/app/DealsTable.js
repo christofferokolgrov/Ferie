@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import {
   nok, fmtDate, fmtSeen, returnDate, savings, ppThreshold,
-  STALE_MS, NEW_MS, PAX_LABEL, OPERATOR_LABEL,
+  STALE_MS, NEW_MS, PAX_LABEL, OPERATOR_LABEL, couponSummary,
 } from './format';
 
 // Sort options each imply a sensible direction — no separate asc/desc toggle.
@@ -71,6 +71,7 @@ function Card({ d, now }) {
   const ret = returnDate(d.departure_date, d.duration_group);
   const name = d.hotel ?? d.accommodation_code ?? 'Unknown';
   const lowSeats = d.availability != null && d.availability <= 2;
+  const { coupons, netPerPerson } = couponSummary(d, now);
 
   return (
     <article className={`card${stale ? ' stale' : ''}`}>
@@ -103,6 +104,18 @@ function Card({ d, now }) {
         <div><dt>Party</dt><dd>{PAX_LABEL[d.pax] ?? d.pax ?? '–'}</dd></div>
         <div><dt>Seats</dt><dd className={lowSeats ? 'low' : ''}>{d.availability ?? '–'}{lowSeats ? ' left!' : ''}</dd></div>
       </dl>
+
+      {coupons.length > 0 && (
+        <div className="coupons" title="Medlemsrabatter som antas å stacke oppå prisen — grovt anslag, gated på dager før avreise. Verifiser vilkår hos operatøren.">
+          <span className="coupons-label">Stackbare kuponger</span>
+          <span className="coupons-tags">
+            {coupons.map((c) => (
+              <span key={c.id} className="coupon">{c.label}{c.value ? ` −${nok(c.value)}` : ''}</span>
+            ))}
+          </span>
+          {netPerPerson != null && <span className="coupons-net">≈ {nok(netPerPerson)}/pp</span>}
+        </div>
+      )}
 
       <div className="card-foot">
         <span className="seen">{fmtSeen(d.last_seen_at, now)}</span>
