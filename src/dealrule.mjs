@@ -12,7 +12,7 @@ import {
  * we read defensively so a missing optional field never throws.
  *
  * @param {object} raw   one product object from the /products response
- * @param {object} ctx   { departureDate, durationGroup }
+ * @param {object} ctx   { departureDate, durationGroup, pax, paxAges }
  */
 export function normalizeProduct(raw, ctx) {
   const price = raw?.Price ?? {};
@@ -24,6 +24,7 @@ export function normalizeProduct(raw, ctx) {
     departureDate: ctx.departureDate,
     durationGroup: ctx.durationGroup,
     pax: ctx.pax ?? null,
+    paxAges: ctx.paxAges ?? null, // kept for the booking-link builder
     hotel: content?.Name ?? raw?.Name ?? null,
     stars: raw?.Classification ?? content?.Classification ?? null,
     distanceToBeach: raw?.DistanceToBeach ?? content?.DistanceToBeach ?? null,
@@ -32,6 +33,10 @@ export function normalizeProduct(raw, ctx) {
     currentPricePerPerson: num(price.CurrentPricePerPerson),
     brochurePrice: num(price.BrochurePrice),
     brochurePricePerPerson: num(price.BrochurePricePerPerson),
+    // Identifiers needed to deep-link into Apollo's booking flow.
+    accommodationUri: raw?.AccommodationUri ?? null,
+    productId: raw?.ProductId ?? null,
+    travelAreaUri: raw?.TravelAreaUri ?? raw?.travelAreaUri ?? null,
   };
 }
 

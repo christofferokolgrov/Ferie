@@ -88,6 +88,7 @@ export function toDealRow(d) {
     brochure_price: d.brochurePrice,
     discount: d.discount,
     reasons: d.reasons,
+    booking_url: d.bookingUrl,
     last_seen_at: new Date().toISOString(),
   };
 }

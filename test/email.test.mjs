@@ -18,6 +18,7 @@ const base = {
   currentPrice: 5800,
   currentPricePerPerson: 2900,
   reasons: ['pp 2900 < 3000'],
+  bookingUrl: 'https://www.apollo.no/booking-guide/core/select-unit-and-meal?productId=X',
 };
 
 test('formatDealLine includes hotel, price, date, party, reason', () => {
@@ -33,6 +34,13 @@ test('formatDealLine includes hotel, price, date, party, reason', () => {
 test('single-deal subject names the hotel', () => {
   const { subject } = formatDealEmail([base]);
   assert.match(subject, /Hotel Sol/);
+});
+
+test('booking link appears in text and html when present', () => {
+  const { text, html } = formatDealEmail([base]);
+  assert.match(text, /select-unit-and-meal\?productId=X/);
+  assert.match(html, /<a href="https:\/\/www\.apollo\.no\/booking-guide/);
+  assert.match(html, /Book on Apollo/);
 });
 
 test('multi-deal subject shows count and cheapest pp', () => {
