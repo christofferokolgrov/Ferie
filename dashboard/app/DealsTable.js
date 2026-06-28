@@ -9,12 +9,14 @@ import {
 // Column definitions. `get` is the sort accessor; `num` marks numeric sort.
 const COLUMNS = [
   { key: 'hotel', label: 'Hotel', get: (d) => (d.hotel ?? d.accommodation_code ?? '').toLowerCase() },
+  { key: 'destination', label: 'Destination', get: (d) => d.destination ?? '' },
   { key: 'operator', label: 'Source', get: (d) => d.operator ?? '' },
   { key: 'pp', label: 'Pr. person', num: true, get: (d) => d.current_price_per_person },
   { key: 'savings', label: 'Savings', num: true, get: (d) => savings(d) },
   { key: 'discount', label: 'Discount', num: true, get: (d) => d.discount },
   { key: 'departure', label: 'Departure', get: (d) => d.departure_date ?? '' },
   { key: 'duration', label: 'Days', num: true, get: (d) => d.duration_group },
+  { key: 'meal', label: 'Meal', get: (d) => d.meal_plan ?? '' },
   { key: 'pax', label: 'Party', sortable: false },
   { key: 'availability', label: 'Seats', num: true, get: (d) => d.availability },
   { key: 'seen', label: 'Seen', num: true, get: (d) => (d.last_seen_at ? new Date(d.last_seen_at).getTime() : 0) },
@@ -86,6 +88,7 @@ export default function DealsTable({ deals, now }) {
                     {d.stars ? ` ★${d.stars}` : ''}
                   </div>
                 </td>
+                <td className="dest">{d.destination ?? '–'}</td>
                 <td><span className={`badge src src-${d.operator}`}>{OPERATOR_LABEL[d.operator] ?? d.operator ?? '–'}</span></td>
                 <td>
                   <span className={`pp${cheap ? ' cheap' : ''}`}>{nok(d.current_price_per_person)}</span>
@@ -98,6 +101,7 @@ export default function DealsTable({ deals, now }) {
                   {ret && <div className="total">→ {fmtDate(ret)}</div>}
                 </td>
                 <td>{d.duration_group ?? '–'}</td>
+                <td>{d.meal_plan ? <span className="badge meal">{d.meal_plan}</span> : '–'}</td>
                 <td>{PAX_LABEL[d.pax] ?? d.pax ?? '–'}</td>
                 <td className={d.availability != null && d.availability <= 2 ? 'seats-low' : undefined}>{d.availability ?? '–'}</td>
                 <td>{fmtSeen(d.last_seen_at, now)}</td>

@@ -5,6 +5,8 @@ import {
   evaluateDeal,
   computeDiscount,
   seenKey,
+  extractDestination,
+  extractMealPlan,
 } from '../src/dealrule.mjs';
 import { PRICE_PER_PERSON_THRESHOLD as T } from '../src/config.mjs';
 
@@ -61,6 +63,32 @@ test('normalizeProduct reads nested + coerces numeric strings', () => {
   assert.equal(p.distanceToBeach, 150);
   assert.equal(p.currentPrice, 5000);
   assert.equal(p.currentPricePerPerson, 2500);
+});
+
+test('extractDestination drops the continent and joins breadcrumbs', () => {
+  assert.equal(extractDestination({ LocationBreadcrumbs: ['Europa', 'Hellas', 'Ioannina'] }), 'Hellas – Ioannina');
+  assert.equal(extractDestination({ LocationBreadcrumbs: ['Hellas'] }), 'Hellas');
+  assert.equal(extractDestination({}), null);
+});
+
+test('extractMealPlan prefers the included plan', () => {
+  const raw = { Units: [{ MealPlans: [
+    { MealPlanCode: 'RO', MealPlanName: 'Kun overnatting', IncludedInPrice: false },
+    { MealPlanCode: 'BF', MealPlanName: 'Frokostbuffé', IncludedInPrice: true },
+  ] }] };
+  assert.equal(extractMealPlan(raw), 'Frokostbuffé');
+  assert.equal(extractMealPlan({}), null);
+});
+
+test('normalizeProduct surfaces destination + meal plan', () => {
+  const p = normalizeProduct(
+    { Content: { Name: 'H', LocationBreadcrumbs: ['Europa', 'Spania', 'Mallorca'] },
+      Units: [{ MealPlans: [{ MealPlanName: 'All Inclusive', IncludedInPrice: true }] }],
+      Price: { CurrentPrice: 5000, CurrentPricePerPerson: 2500 } },
+    ctx,
+  );
+  assert.equal(p.destination, 'Spania – Mallorca');
+  assert.equal(p.mealPlan, 'All Inclusive');
 });
 
 test('seenKey is the locked identity tuple (incl. pax)', () => {
