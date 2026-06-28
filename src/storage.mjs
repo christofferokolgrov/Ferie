@@ -80,6 +80,8 @@ export function toDealRow(d) {
     duration_group: d.durationGroup,
     pax: d.pax,
     hotel: d.hotel,
+    destination: d.destination,
+    meal_plan: d.mealPlan,
     stars: d.stars,
     distance_to_beach: d.distanceToBeach,
     availability: d.availability,

@@ -27,7 +27,10 @@ export function normalizeProduct(raw, ctx) {
     paxAges: ctx.paxAges ?? null, // kept for the booking-link builder
     hotel: content?.Name ?? raw?.Name ?? null,
     stars: raw?.Classification ?? content?.Classification ?? null,
-    distanceToBeach: raw?.DistanceToBeach ?? content?.DistanceToBeach ?? null,
+    distanceToBeach:
+      raw?.DistanceToBeach ?? content?.DistanceToBeach ?? content?.DistanceToCenter ?? null,
+    destination: extractDestination(content),
+    mealPlan: extractMealPlan(raw),
     availability: raw?.Availability ?? null,
     currentPrice: num(price.CurrentPrice),
     currentPricePerPerson: num(price.CurrentPricePerPerson),
@@ -81,4 +84,35 @@ function num(v) {
   if (v == null) return null;
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Apollo's Content.LocationBreadcrumbs is [continent, country, area], e.g.
+ * ["Europa","Hellas","Ioannina"]. Drop the continent and join → "Hellas – Ioannina".
+ */
+export function extractDestination(content) {
+  const bc = content?.LocationBreadcrumbs;
+  if (Array.isArray(bc) && bc.length) {
+    const parts = (bc.length > 1 ? bc.slice(1) : bc).filter(Boolean);
+    if (parts.length) return parts.join(' – ');
+  }
+  return content?.Destination ?? content?.Country ?? null;
+}
+
+/**
+ * Meal plan included in the price, from Apollo's Units[].MealPlans (prefer the
+ * one flagged IncludedInPrice). Returns a display name like "Frokostbuffé".
+ */
+export function extractMealPlan(raw) {
+  const units = raw?.Units;
+  if (Array.isArray(units)) {
+    for (const u of units) {
+      const mps = u?.MealPlans;
+      if (Array.isArray(mps) && mps.length) {
+        const inc = mps.find((m) => m?.IncludedInPrice) ?? mps[0];
+        if (inc) return inc.MealPlanName ?? inc.MealPlanCode ?? null;
+      }
+    }
+  }
+  return null;
 }
