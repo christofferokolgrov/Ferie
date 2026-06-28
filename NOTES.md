@@ -112,32 +112,58 @@ Run a live smoke test with `npm run sweep:apollo` (needs `playwright` installed
 + `npx playwright install chromium`). DB persistence + email are clean seams —
 the sweep just **returns** qualifying deals for now.
 
+## Stack + pipeline — LOCKED 2026-06-28
+Grilling resolved the remaining infra branches:
+- **Email transport:** **Resend** (free tier, HTTPS API, no SMTP fiddling).
+- **Database:** **Supabase Postgres** — `deals` (dashboard source) + `seen`
+  (notification dedup). Schema in `supabase/migrations/0001_init.sql`.
+- **Runner:** **GitHub Actions cron** (`*/30`-ish, off-minute). Free; the spike
+  already proved a headless browser clears CF from a datacenter IP, so GH's
+  datacenter runners work. Trade-off: GH may delay busy scheduled runs a few min.
+  Render/Lightsail kept as fallbacks if cadence proves too laggy.
+
+### Pipeline — BUILT 2026-06-28
+Full Apollo path is wired end-to-end and unit-tested (22 passing, no network):
+- `src/storage.mjs`  — Store port; `SupabaseStore` (lazy supabase-js) +
+  `InMemoryStore` fallback; `createStoreFromEnv`.
+- `src/email.mjs`    — pure `formatDealEmail`/`formatDealLine`; `ResendMailer`
+  (injectable fetch) + `ConsoleMailer` fallback; `createMailerFromEnv`.
+- `src/pipeline.mjs` — `runPipeline({sweep,store,mailer})`: sweep → upsert all
+  qualifying (dashboard) → dedup via `seen` → email only NEW → mark notified.
+- `src/run.mjs`      — env-wired entrypoint the cron calls (`node src/run.mjs`).
+- `.github/workflows/sweep.yml` — the 30-min cron (needs repo secrets:
+  SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, EMAIL_FROM, EMAIL_TO).
+- `.github/workflows/test.yml`  — runs `node --test` on push/PR.
+Graceful degradation: missing Supabase env → in-memory store; missing Resend env
+→ emails logged not sent. So a local `npm run` works with zero secrets.
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.
-2. First source: **Apollo** — feasibility SOLVED + **adapter built** (`src/`).
-   Pattern: Playwright (headless, container, NO proxy) clears Cloudflare, then
-   call clean JSON BFF via in-page fetch.
+2. First source: **Apollo** — feasibility SOLVED, adapter built, **full
+   sweep→dedup→email pipeline built** (`src/`). Pattern: Playwright (headless,
+   container, NO proxy) clears Cloudflare, then call clean JSON BFF via in-page fetch.
 3. Deal rule: email if `CurrentPricePerPerson < 3000` OR discount >= 70%.
 4. Notify immediately on first sighting; dedup via seen-key
    `(operator, accommodationCode, departureDate, duration)`.
-5. Sweep: every 30 min, 45-day horizon, durations {7,14}, two-stage (see above).
-6. Stack instinct: Playwright-in-a-container (Render ~$1/mo or existing Lightsail)
-   + Supabase (DB + cron) + Vercel (read-only dashboard). Edge/serverless-scrape
-   ruled out (CF needs a real browser).
+5. Sweep: every 30 min, 45-day horizon, durations {7,14}, two-stage.
+6. Stack: Resend (email) + Supabase Postgres (DB) + GitHub Actions cron (runner).
+   Vercel read-only dashboard still planned. Edge/serverless-scrape ruled out.
 7. GitHub: private repo christofferokolgrov/Ferie, pushed.
 
+### Operational TODO (before it actually runs)
+- [ ] Apply `supabase/migrations/0001_init.sql` to a Supabase project.
+- [ ] Add the 5 repo secrets so the cron can store + email.
+- [ ] Verify a Resend sender domain for `EMAIL_FROM`.
+- [ ] Live-smoke `npm run sweep:apollo` to confirm `/products` field shapes match
+      `normalizeProduct` (BrochurePrice/Content paths) against production.
+
 ### Still open (next grilling branches)
-- [ ] Email transport: Resend free tier vs Microsoft 365 SMTP.
-- [ ] DB schema: deals table + seen table (fields from /products: name, stars,
-      beach dist, availability, prices). Adapter already emits these per deal.
-- [ ] Where the scraper actually runs (Render vs Lightsail) + how it's triggered
-      on the 30-min cadence.
-- [ ] Dashboard scope (what to show; auth needed or just private URL?).
+- [ ] Dashboard: Vercel read-only view of `deals`. Scope + auth (private URL vs
+      Supabase RLS + anon read).
 - [ ] Then: replicate for Ving (JS-rendered, /websearchresult) and TUI (Akamai —
       hardest, may need proxy).
 
 ### Next action
-Live-smoke the Apollo adapter against the real BFF (`npm run sweep:apollo`) to
-confirm the field shapes in `normalizeProduct` match production, then grill the
-DB schema + email transport so the sweep's returned deals have somewhere to go.
+Provision Supabase + secrets and live-smoke against the real BFF; once a sweep
+stores real deals, build the Vercel dashboard over the `deals` table.

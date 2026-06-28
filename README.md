@@ -11,16 +11,31 @@ when a good one appears, and surfaces current deals on a dashboard.
 
 ## Status
 
-Early build. Apollo feasibility solved and the **Apollo adapter is built**
-(`src/`, two-stage sweep, 12 passing unit tests). Sweep params locked: every
-30 min, 45-day horizon, durations {7, 14}. DB + email transport still being
-grilled — see [`NOTES.md`](./NOTES.md).
+Apollo path built end-to-end: **sweep → store → dedup → email**, running on a
+30-min GitHub Actions cron. Stack locked: **Resend** (email) + **Supabase
+Postgres** (`deals` + `seen`) + **GitHub Actions** (runner). 22 passing unit
+tests. Remaining: provision Supabase + secrets, then a Vercel dashboard and the
+Ving/TUI sources — see [`NOTES.md`](./NOTES.md).
 
 ```bash
 npm install
 npm test                 # pure logic, no network
-npm run sweep:apollo     # live sweep (needs: npx playwright install chromium)
+npm run sweep:apollo     # live sweep only (needs: npx playwright install chromium)
+npm run run              # full pipeline; uses env (falls back to in-memory + console)
 ```
+
+## How it runs
+
+`.github/workflows/sweep.yml` runs `node src/run.mjs` every ~30 min. It needs
+these repo secrets (see [`.env.example`](./.env.example)):
+
+| Secret | Purpose |
+|--------|---------|
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | store deals + dedup set |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TO`  | send deal alerts |
+
+Apply `supabase/migrations/0001_init.sql` to your Supabase project first. With
+no secrets set, a run still works locally (in-memory store, emails logged).
 
 ## Target sources & access reality (probed 2026-06-28)
 
