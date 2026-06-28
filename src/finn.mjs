@@ -25,7 +25,7 @@ import {
   USER_AGENT,
 } from './config.mjs';
 import { addDays } from './dates.mjs';
-import { evaluateDeal, seenKey } from './dealrule.mjs';
+import { evaluateDeal, seenKey, num, joinDestination } from './dealrule.mjs';
 
 // ---------------------------------------------------------------------------
 // URL builder (pure). Params discovered in the spike: fra=airport, med=operator
@@ -71,7 +71,7 @@ export function normalizeFinnOffer(offer) {
     durationGroup: int(offer?.duration), // days (integer; column is NOT NULL)
     pax: null, // Finn has no party concept
     hotel: offer?.hotelName ?? null,
-    destination: joinPlace(offer?.country, offer?.destination), // e.g. "Hellas – Rhodos by"
+    destination: joinDestination(offer?.country, offer?.destination), // e.g. "Hellas – Rhodos by"
     mealPlan: null, // Finn's offer JSON carries no board basis → all-inclusive tier can't apply
     stars: rating && rating > 0 ? rating : null, // 0.0 = unrated; feeds the 4★ price tier
     distanceToBeach: null,
@@ -211,20 +211,9 @@ export async function runFinn({ todayIso } = {}) {
   return sweepFinn({ todayIso: today, fetchOffers: (page) => fetchFinnPage(page) });
 }
 
-function num(v) {
-  if (v == null) return null;
-  const n = typeof v === 'number' ? v : Number(v);
-  return Number.isFinite(n) ? n : null;
-}
 function int(v) {
   const n = num(v);
   return n == null ? null : Math.trunc(n);
-}
-/** Join "country – place" like Apollo's destination, dropping blanks/dupes. */
-function joinPlace(country, place) {
-  const parts = [country, place].map((s) => (s ?? '').trim()).filter(Boolean);
-  const uniq = [...new Set(parts)];
-  return uniq.length ? uniq.join(' – ') : null;
 }
 function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
