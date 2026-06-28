@@ -166,6 +166,18 @@ catches a still-failing cheapest/products call, counts it (`stats.failedCalls`),
 logs it, and continues instead of crashing. First real deals delivered run #8
 (Malia Princess 2892/pp; Monte Feliz 76% off — both family-config hits).
 
+## Vercel dashboard — BUILT 2026-06-28
+Read-only Next.js (App Router) app in `dashboard/`, deployed to Vercel (root dir
+= `dashboard`). Server component fetches `deals` with the service-role key
+(server-only → table stays RLS-locked, no public read policy). Single dynamic
+page: qualifying deals, cheapest/pp first, with discount badge, party label,
+seats, "seen" freshness (stale rows dimmed >2h), and a "Book →" deep link.
+- Decision: no auth in v1 (just holiday deals) — access via the Vercel URL.
+- Env on Vercel: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (same as GH secrets).
+- Next 16 / React 19 (cleared the high-sev Next DoS advisories; one transitive
+  postcss moderate remains, bundled inside Next — build-time only, not runtime).
+- Build verified locally (`npm run build`, / is server-rendered/dynamic).
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.
