@@ -6,9 +6,11 @@
   "description": "Personal monitor for restplasser (last-minute package-holiday seats) departing OSL.",
   "scripts": {
     "test": "node --test",
-    "sweep:apollo": "node src/apollo.mjs"
+    "sweep:apollo": "node src/apollo.mjs",
+    "run": "node src/run.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.43.0",
     "playwright": "^1.44.0"
   }
 }
