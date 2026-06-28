@@ -6,6 +6,7 @@ import {
   computeDiscount,
   seenKey,
 } from '../src/dealrule.mjs';
+import { PRICE_PER_PERSON_THRESHOLD as T } from '../src/config.mjs';
 
 const ctx = { departureDate: '2026-07-10', durationGroup: 7, pax: '2v' };
 
@@ -17,31 +18,32 @@ function product(price) {
 }
 
 test('absolute rule: cheap per-person qualifies', () => {
-  const p = product({ CurrentPrice: 5800, CurrentPricePerPerson: 2900, BrochurePrice: 6000 });
+  const pp = T - 100;
+  const p = product({ CurrentPrice: pp * 2, CurrentPricePerPerson: pp, BrochurePrice: pp * 2 + 200 });
   const r = evaluateDeal(p);
   assert.equal(r.qualifies, true);
-  assert.match(r.reasons.join(' '), /2900 < 3000/);
+  assert.match(r.reasons.join(' '), new RegExp(`${pp} < ${T}`));
 });
 
 test('absolute rule: at threshold does not qualify (strict <)', () => {
-  const p = product({ CurrentPrice: 6000, CurrentPricePerPerson: 3000, BrochurePrice: 6100 });
+  const p = product({ CurrentPrice: T * 2, CurrentPricePerPerson: T, BrochurePrice: T * 2 + 100 });
   const r = evaluateDeal(p);
   assert.equal(r.qualifies, false);
 });
 
 test('discount rule: 70% off qualifies even when not cheap per-person', () => {
-  const p = product({ CurrentPrice: 6000, CurrentPricePerPerson: 3500, BrochurePrice: 20000 });
+  // pp at/above threshold so only the discount rule can fire.
+  const p = product({ CurrentPrice: T * 2, CurrentPricePerPerson: T, BrochurePrice: T * 2 / 0.3 });
   const r = evaluateDeal(p);
   assert.equal(r.qualifies, true);
   assert.match(r.reasons.join(' '), /70% off/);
 });
 
-test('discount rule: 69% off does not qualify', () => {
-  const p = product({ CurrentPrice: 3100, CurrentPricePerPerson: 1550, BrochurePrice: 10000 });
-  // pp is cheap here so it WOULD qualify on absolute; isolate the discount rule:
-  const expensive = product({ CurrentPrice: 6200, CurrentPricePerPerson: 3100, BrochurePrice: 10000 });
+test('discount rule: 69% off + not cheap does not qualify', () => {
+  // pp above threshold and discount below 70%.
+  const expensive = product({ CurrentPrice: 6200, CurrentPricePerPerson: T + 200, BrochurePrice: 10000 });
   assert.equal(evaluateDeal(expensive).qualifies, false);
-  assert.ok(computeDiscount(p) < 0.7);
+  assert.ok(computeDiscount(expensive) < 0.7);
 });
 
 test('computeDiscount returns null without a usable brochure price', () => {

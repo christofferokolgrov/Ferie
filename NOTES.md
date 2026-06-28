@@ -183,6 +183,19 @@ seats, "seen" freshness (stale rows dimmed >2h), and a "Book →" deep link.
   Note: existing pre-#9 deals show no link until a fresh sweep re-upserts them
   with booking_url.
 
+## Tuning — 2026-06-28
+- Price threshold raised 3000 → **3500** kr/pp (PRICE_PER_PERSON_THRESHOLD).
+  Email footer + dashboard copy now derive from the constant.
+- Cron cadence 30 → **15 min** (`7,22,37,52 * * * *`). GitHub still delays
+  scheduled runs, so effective cadence is looser.
+
+## Multi-source (Ving + TUI) — IN PROGRESS 2026-06-28
+Goal: add Ving and TUI alongside Apollo. Constraint: this dev env's proxy blocks
+ving.no/tui.no (403), so contracts can only be probed from GitHub Actions
+runners. Approach: source registry + resilient multi-source pipeline (a source
+that errors is skipped, others still run/email), adapters following the Apollo
+pattern, and a CI probe to capture real endpoint shapes.
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.
