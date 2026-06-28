@@ -41,7 +41,7 @@ test('extractProducts handles array and wrapped shapes', () => {
   assert.deepEqual(extractProducts({}), []);
 });
 
-test('sweepApollo: two-stage flow, only real departure dates hit /products', async () => {
+test('sweepApollo: two-stage flow across parties, only real departure dates hit /products', async () => {
   const calls = [];
   // Fake BFF: cheapest returns 1 date for dg7, 1 for dg14; products returns
   // one qualifying + one non-qualifying product per date.
@@ -62,16 +62,18 @@ test('sweepApollo: two-stage flow, only real departure dates hit /products', asy
 
   const { deals, stats } = await sweepApollo({ todayIso: '2026-06-28', fetchJson });
 
-  // 2 cheapest calls + 2 products calls (one real date per duration).
-  assert.equal(calls.filter((u) => u.includes('/cheapest')).length, 2);
-  assert.equal(stats.productCalls, 2);
-  assert.equal(stats.qualifying, 2); // one CHEAP per duration
-  assert.equal(stats.productsSeen, 4); // 2 products × 2 dates
-  assert.equal(stats.priced, 4); // all have a parseable per-person price
+  // 3 parties × 2 durations: 6 cheapest calls + 6 products calls.
+  assert.deepEqual(stats.paxConfigs, ['2v', '2v2b', '4v2b']);
+  assert.equal(calls.filter((u) => u.includes('/cheapest')).length, 6);
+  assert.equal(stats.productCalls, 6);
+  assert.equal(stats.qualifying, 6); // one CHEAP per (party × duration)
+  assert.equal(stats.productsSeen, 12); // 2 products × 2 dates × 3 parties
+  assert.equal(stats.priced, 12);
   assert.equal(stats.minPricePerPerson, 2500);
   assert.ok(deals.every((d) => d.accommodationCode === 'CHEAP'));
-  assert.deepEqual([...new Set(deals.map((d) => d.key))].sort(), [
-    'apollo|CHEAP|2026-07-03|7',
-    'apollo|CHEAP|2026-07-17|14',
-  ]);
+  // paxAges is carried into the BFF query for each party.
+  assert.ok(calls.some((u) => u.includes('paxAges=18%2C18%2C9%2C12')));
+  // Every party appears, and keys are distinct per party.
+  assert.deepEqual([...new Set(deals.map((d) => d.pax))].sort(), ['2v', '2v2b', '4v2b']);
+  assert.equal(new Set(deals.map((d) => d.key)).size, 6);
 });

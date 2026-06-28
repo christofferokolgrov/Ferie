@@ -6,7 +6,7 @@ import {
   DEPARTURE_AIRPORT,
   DURATION_GROUPS,
   HORIZON_DAYS,
-  PAX_AGES,
+  PAX_CONFIGS,
 } from './config.mjs';
 import { sweepWindow } from './dates.mjs';
 import { normalizeProduct, evaluateDeal, seenKey } from './dealrule.mjs';
@@ -15,23 +15,23 @@ import { normalizeProduct, evaluateDeal, seenKey } from './dealrule.mjs';
 // URL builders (pure)
 // ---------------------------------------------------------------------------
 
-export function buildCheapestUrl({ durationGroup, startDate, endDate }) {
+export function buildCheapestUrl({ durationGroup, startDate, endDate, paxAges }) {
   const q = new URLSearchParams({
     durationGroup: String(durationGroup),
     departureAirportCode: DEPARTURE_AIRPORT,
     startDate,
     endDate,
-    paxAges: PAX_AGES,
+    paxAges,
   });
   return `${BFF_BASE}/departures/cheapest?${q}`;
 }
 
-export function buildProductsUrl({ durationGroup, departureDate }) {
+export function buildProductsUrl({ durationGroup, departureDate, paxAges }) {
   const q = new URLSearchParams({
     departureAirportCode: DEPARTURE_AIRPORT,
     departureDate,
     durationGroup: String(durationGroup),
-    paxAges: PAX_AGES,
+    paxAges,
   });
   return `${BFF_BASE}/products?${q}`;
 }
@@ -102,36 +102,40 @@ export async function sweepApollo({ todayIso, fetchJson }) {
   let minPricePerPerson = null;
   let sampleRaw = null;
 
-  for (const durationGroup of DURATION_GROUPS) {
-    // Stage 1: cheap calendar call → which dates actually have departures.
-    const cheapest = await fetchJson(
-      buildCheapestUrl({ durationGroup, ...window }),
-      body,
-    );
-    const dates = extractDepartureDates(cheapest);
-    departureDateCount += dates.length;
-
-    // Stage 2: one /products call per real departure date → full price detail
-    // (BrochurePrice lives only here), evaluate both deal rules per product.
-    for (const departureDate of dates) {
-      const productsJson = await fetchJson(
-        buildProductsUrl({ durationGroup, departureDate }),
+  // Sweep each party configuration independently: per-person price and
+  // availability differ by party, so the same hotel/date is a distinct deal.
+  for (const pax of PAX_CONFIGS) {
+    for (const durationGroup of DURATION_GROUPS) {
+      // Stage 1: cheap calendar call → which dates actually have departures.
+      const cheapest = await fetchJson(
+        buildCheapestUrl({ durationGroup, ...window, paxAges: pax.paxAges }),
         body,
       );
-      productCalls += 1;
-      for (const raw of extractProducts(productsJson)) {
-        if (sampleRaw === null) sampleRaw = raw;
-        productsSeen += 1;
-        const p = normalizeProduct(raw, { departureDate, durationGroup });
-        if (p.currentPricePerPerson != null) {
-          priced += 1;
-          if (minPricePerPerson === null || p.currentPricePerPerson < minPricePerPerson) {
-            minPricePerPerson = p.currentPricePerPerson;
+      const dates = extractDepartureDates(cheapest);
+      departureDateCount += dates.length;
+
+      // Stage 2: one /products call per real departure date → full price detail
+      // (BrochurePrice lives only here), evaluate both deal rules per product.
+      for (const departureDate of dates) {
+        const productsJson = await fetchJson(
+          buildProductsUrl({ durationGroup, departureDate, paxAges: pax.paxAges }),
+          body,
+        );
+        productCalls += 1;
+        for (const raw of extractProducts(productsJson)) {
+          if (sampleRaw === null) sampleRaw = raw;
+          productsSeen += 1;
+          const p = normalizeProduct(raw, { departureDate, durationGroup, pax: pax.key });
+          if (p.currentPricePerPerson != null) {
+            priced += 1;
+            if (minPricePerPerson === null || p.currentPricePerPerson < minPricePerPerson) {
+              minPricePerPerson = p.currentPricePerPerson;
+            }
           }
-        }
-        const evalResult = evaluateDeal(p);
-        if (evalResult.qualifies) {
-          deals.push({ ...p, ...evalResult, key: seenKey(p) });
+          const evalResult = evaluateDeal(p);
+          if (evalResult.qualifies) {
+            deals.push({ ...p, ...evalResult, key: seenKey(p) });
+          }
         }
       }
     }
@@ -149,6 +153,7 @@ export async function sweepApollo({ todayIso, fetchJson }) {
   return {
     deals,
     stats: {
+      paxConfigs: PAX_CONFIGS.map((p) => p.key),
       durationGroups: DURATION_GROUPS,
       departureDates: departureDateCount,
       productCalls,

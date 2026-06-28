@@ -16,8 +16,20 @@ export const DURATION_GROUPS = [7, 14];
 // How far ahead each sweep looks for departures.
 export const HORIZON_DAYS = 45;
 
-// Two adults; mirrors the proven spike query (paxAges=18,18).
-export const PAX_AGES = '18,18';
+// Party configurations to sweep. paxAges is Apollo's comma-separated age list
+// (18 = adult). Each party is searched independently (its per-person price and
+// availability differ), so `key` is part of the deal identity and is stored on
+// every deal. Keep `key` stable — changing it resets dedup for that party.
+export const PAX_CONFIGS = [
+  { key: '2v', label: '2 voksne', paxAges: '18,18' },
+  { key: '2v2b', label: '2 voksne + 2 barn (9, 12)', paxAges: '18,18,9,12' },
+  { key: '4v2b', label: '4 voksne + 2 barn (9, 12)', paxAges: '18,18,18,18,9,12' },
+];
+
+// Friendly label lookup for emails/dashboard, keyed by the stable pax key.
+export const PAX_LABEL = Object.fromEntries(
+  PAX_CONFIGS.map((p) => [p.key, p.label]),
+);
 
 // Cron cadence — informational; the schedule lives in the runner, not here.
 export const POLL_INTERVAL_MIN = 30;

@@ -11,6 +11,7 @@ const base = {
   accommodationCode: 'AC1',
   departureDate: '2026-07-10',
   durationGroup: 7,
+  pax: '2v',
   hotel: 'Hotel Sol',
   stars: 4,
   availability: 3,
@@ -19,12 +20,13 @@ const base = {
   reasons: ['pp 2900 < 3000'],
 };
 
-test('formatDealLine includes hotel, price, date, reason', () => {
+test('formatDealLine includes hotel, price, date, party, reason', () => {
   const line = formatDealLine(base);
   assert.match(line, /Hotel Sol/);
   assert.match(line, /★4/);
   assert.match(line, /\/pp/);
   assert.match(line, /2026-07-10/);
+  assert.match(line, /2 voksne/); // pax label resolved from key
   assert.match(line, /pp 2900 < 3000/);
 });
 

@@ -1,14 +1,17 @@
 // Email layer: a pure formatter (unit-tested) + a Resend-backed sender.
 
+import { PAX_LABEL } from './config.mjs';
+
 const NOK = (n) =>
   n == null ? '–' : `${Math.round(n).toLocaleString('nb-NO')} kr`;
 
-/** One human line for a deal, e.g. "Hotel Sol ★4 — 2 900 kr/pp, 10–17 Jul (7d) [pp 2900 < 3000]". */
+/** One human line for a deal, e.g. "Hotel Sol ★4 — 2 900 kr/pp, dep 2026-07-10, 7d, 2 voksne [pp 2900 < 3000]". */
 export function formatDealLine(d) {
   const stars = d.stars ? ` ★${d.stars}` : '';
   const why = d.reasons?.length ? ` [${d.reasons.join(', ')}]` : '';
   const seats = d.availability != null ? `, ${d.availability} seats` : '';
-  return `${d.hotel ?? d.accommodationCode ?? 'Unknown'}${stars} — ${NOK(d.currentPricePerPerson)}/pp (total ${NOK(d.currentPrice)}), dep ${d.departureDate}, ${d.durationGroup}d${seats}${why}`;
+  const party = d.pax ? `, ${PAX_LABEL[d.pax] ?? d.pax}` : '';
+  return `${d.hotel ?? d.accommodationCode ?? 'Unknown'}${stars} — ${NOK(d.currentPricePerPerson)}/pp (total ${NOK(d.currentPrice)}), dep ${d.departureDate}, ${d.durationGroup}d${party}${seats}${why}`;
 }
 
 /**

@@ -7,7 +7,7 @@ import {
   seenKey,
 } from '../src/dealrule.mjs';
 
-const ctx = { departureDate: '2026-07-10', durationGroup: 7 };
+const ctx = { departureDate: '2026-07-10', durationGroup: 7, pax: '2v' };
 
 function product(price) {
   return normalizeProduct(
@@ -61,7 +61,7 @@ test('normalizeProduct reads nested + coerces numeric strings', () => {
   assert.equal(p.currentPricePerPerson, 2500);
 });
 
-test('seenKey is the locked identity tuple', () => {
+test('seenKey is the locked identity tuple (incl. pax)', () => {
   const p = product({ CurrentPrice: 5000, CurrentPricePerPerson: 2500, BrochurePrice: 6000 });
-  assert.equal(seenKey(p), 'apollo|AC1|2026-07-10|7');
+  assert.equal(seenKey(p), 'apollo|AC1|2026-07-10|7|2v');
 });
