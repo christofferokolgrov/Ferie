@@ -1,6 +1,20 @@
 // Shared display helpers + constants for the dashboard.
 
-export const PP_THRESHOLD = 3500; // matches the scraper's PRICE_PER_PERSON_THRESHOLD
+// Mirrors the scraper's tiered price bars (src/config.mjs). Keep in sync.
+export const PP_THRESHOLD = 3500; // base
+export const PP_THRESHOLD_4STAR = 4500;
+export const PP_THRESHOLD_AI = 6000;
+
+export const isAllInclusive = (mealPlan) =>
+  mealPlan != null && /inclusive|inkludert/i.test(String(mealPlan));
+
+/** The per-person bar that applies to a deal row (highest tier wins). */
+export function ppThreshold(d) {
+  let t = PP_THRESHOLD;
+  if (d.stars != null && Number(d.stars) >= 4) t = Math.max(t, PP_THRESHOLD_4STAR);
+  if (isAllInclusive(d.meal_plan)) t = Math.max(t, PP_THRESHOLD_AI);
+  return t;
+}
 export const STALE_MS = 2 * 60 * 60 * 1000; // not seen in last sweep window → dim
 export const NEW_MS = 90 * 60 * 1000; // first seen this recently → "NEW"
 

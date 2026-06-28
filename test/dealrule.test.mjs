@@ -7,6 +7,8 @@ import {
   seenKey,
   extractDestination,
   extractMealPlan,
+  priceThreshold,
+  isAllInclusive,
 } from '../src/dealrule.mjs';
 import { PRICE_PER_PERSON_THRESHOLD as T } from '../src/config.mjs';
 
@@ -46,6 +48,43 @@ test('discount rule: 69% off + not cheap does not qualify', () => {
   const expensive = product({ CurrentPrice: 6200, CurrentPricePerPerson: T + 200, BrochurePrice: 10000 });
   assert.equal(evaluateDeal(expensive).qualifies, false);
   assert.ok(computeDiscount(expensive) < 0.7);
+});
+
+// Build a product with stars and/or an included meal plan.
+function productWith(price, { stars, meal } = {}) {
+  const raw = { AccommodationCode: 'AC1', Content: { Name: 'H', Classification: stars }, Price: price };
+  if (meal) raw.Units = [{ MealPlans: [{ MealPlanName: meal, IncludedInPrice: true }] }];
+  return normalizeProduct(raw, ctx);
+}
+
+test('isAllInclusive matches AI meal plans', () => {
+  assert.equal(isAllInclusive('All Inclusive'), true);
+  assert.equal(isAllInclusive('Ultra All Inclusive'), true);
+  assert.equal(isAllInclusive('Alt inkludert'), true);
+  assert.equal(isAllInclusive('Frokostbuffé'), false);
+  assert.equal(isAllInclusive(null), false);
+});
+
+test('priceThreshold tiers: base / 4★ / all-inclusive / combined', () => {
+  assert.equal(priceThreshold({ stars: 3 }).value, 3500);
+  assert.equal(priceThreshold({ stars: 4 }).value, 4500);
+  assert.equal(priceThreshold({ stars: 5 }).value, 4500);
+  assert.equal(priceThreshold({ stars: 3, mealPlan: 'All Inclusive' }).value, 6000);
+  assert.equal(priceThreshold({ stars: 5, mealPlan: 'All Inclusive' }).value, 6000); // highest wins
+});
+
+test('4★ raises the bar to 4500', () => {
+  assert.equal(evaluateDeal(productWith({ CurrentPrice: 8400, CurrentPricePerPerson: 4200 }, { stars: 4 })).qualifies, true);
+  // same price, only 3★ → below 4500 tier doesn't apply, over base 3500 → no
+  assert.equal(evaluateDeal(productWith({ CurrentPrice: 8400, CurrentPricePerPerson: 4200 }, { stars: 3 })).qualifies, false);
+});
+
+test('all-inclusive raises the bar to 6000', () => {
+  const ai = evaluateDeal(productWith({ CurrentPrice: 11000, CurrentPricePerPerson: 5500 }, { stars: 3, meal: 'All Inclusive' }));
+  assert.equal(ai.qualifies, true);
+  assert.match(ai.reasons.join(' '), /all-inclusive/);
+  // 5★ but not AI → bar is 4500, 5500 over it → no
+  assert.equal(evaluateDeal(productWith({ CurrentPrice: 11000, CurrentPricePerPerson: 5500 }, { stars: 5, meal: 'Frokostbuffé' })).qualifies, false);
 });
 
 test('computeDiscount returns null without a usable brochure price', () => {

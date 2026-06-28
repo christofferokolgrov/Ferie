@@ -1,6 +1,9 @@
 import {
   OPERATOR,
   PRICE_PER_PERSON_THRESHOLD,
+  PRICE_PP_THRESHOLD_4STAR,
+  PRICE_PP_THRESHOLD_ALL_INCLUSIVE,
+  STAR_THRESHOLD,
   DISCOUNT_THRESHOLD,
 } from './config.mjs';
 
@@ -43,17 +46,42 @@ export function normalizeProduct(raw, ctx) {
   };
 }
 
+/** True when the meal plan is (ultra) all-inclusive. */
+export function isAllInclusive(mealPlan) {
+  return mealPlan != null && /inclusive|inkludert/i.test(String(mealPlan));
+}
+
 /**
- * Apply the locked deal rule to a normalized product.
- * Email if EITHER CurrentPricePerPerson < 3000 OR discount >= 70%.
+ * The per-person price bar for this deal. Base 3500, raised to 4500 for 4★+ and
+ * to 6000 for all-inclusive; the highest applicable tier wins.
+ * @returns {{ value: number, tier: string }}
+ */
+export function priceThreshold(p) {
+  let value = PRICE_PER_PERSON_THRESHOLD;
+  let tier = '';
+  if (p.stars != null && Number(p.stars) >= STAR_THRESHOLD && PRICE_PP_THRESHOLD_4STAR > value) {
+    value = PRICE_PP_THRESHOLD_4STAR;
+    tier = '4★+';
+  }
+  if (isAllInclusive(p.mealPlan) && PRICE_PP_THRESHOLD_ALL_INCLUSIVE > value) {
+    value = PRICE_PP_THRESHOLD_ALL_INCLUSIVE;
+    tier = 'all-inclusive';
+  }
+  return { value, tier };
+}
+
+/**
+ * Apply the deal rule to a normalized product.
+ * Email if EITHER CurrentPricePerPerson < its tiered bar OR discount >= 70%.
  *
  * @returns {{ qualifies: boolean, reasons: string[], discount: number|null }}
  */
 export function evaluateDeal(p) {
   const reasons = [];
 
-  if (p.currentPricePerPerson != null && p.currentPricePerPerson < PRICE_PER_PERSON_THRESHOLD) {
-    reasons.push(`pp ${p.currentPricePerPerson} < ${PRICE_PER_PERSON_THRESHOLD}`);
+  const { value: threshold, tier } = priceThreshold(p);
+  if (p.currentPricePerPerson != null && p.currentPricePerPerson < threshold) {
+    reasons.push(`pp ${p.currentPricePerPerson} < ${threshold}${tier ? ` (${tier})` : ''}`);
   }
 
   const discount = computeDiscount(p);
