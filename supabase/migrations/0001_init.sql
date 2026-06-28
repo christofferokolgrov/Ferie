@@ -30,3 +30,10 @@ create table if not exists seen (
   operator           text        not null,
   first_notified_at  timestamptz not null default now()
 );
+
+-- Lock both tables down. The scraper uses the service-role key, which bypasses
+-- RLS, so enabling RLS with NO policies = service-role-only (no public/anon
+-- access via the auto-exposed REST API). A read-only SELECT policy for `anon`
+-- can be added later when the dashboard needs it.
+alter table deals enable row level security;
+alter table seen  enable row level security;
