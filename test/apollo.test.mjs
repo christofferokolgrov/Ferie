@@ -66,6 +66,9 @@ test('sweepApollo: two-stage flow, only real departure dates hit /products', asy
   assert.equal(calls.filter((u) => u.includes('/cheapest')).length, 2);
   assert.equal(stats.productCalls, 2);
   assert.equal(stats.qualifying, 2); // one CHEAP per duration
+  assert.equal(stats.productsSeen, 4); // 2 products × 2 dates
+  assert.equal(stats.priced, 4); // all have a parseable per-person price
+  assert.equal(stats.minPricePerPerson, 2500);
   assert.ok(deals.every((d) => d.accommodationCode === 'CHEAP'));
   assert.deepEqual([...new Set(deals.map((d) => d.key))].sort(), [
     'apollo|CHEAP|2026-07-03|7',
