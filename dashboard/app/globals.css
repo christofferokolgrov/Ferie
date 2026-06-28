@@ -61,8 +61,21 @@ tbody tr:hover { background: rgba(255,255,255,.02); }
 }
 .book:hover { filter: brightness(1.08); }
 
+.hotel-link { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--muted); }
+.hotel-link:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
 .stale td { opacity: .5; }
 .seats-low { color: var(--warn); font-weight: 600; }
+
+.runbox { margin-top: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.run {
+  background: var(--good); color: #04221a; border: none; cursor: pointer;
+  padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 14px;
+}
+.run:hover:not(:disabled) { filter: brightness(1.07); }
+.run:disabled { opacity: .6; cursor: default; }
+.run-ok { color: var(--good); font-size: 13px; }
+.run-err { color: #ff8a8a; font-size: 13px; }
 
 .empty, .error {
   padding: 40px; text-align: center; color: var(--muted);

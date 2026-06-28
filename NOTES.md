@@ -177,6 +177,11 @@ seats, "seen" freshness (stale rows dimmed >2h), and a "Book →" deep link.
 - Next 16 / React 19 (cleared the high-sev Next DoS advisories; one transitive
   postcss moderate remains, bundled inside Next — build-time only, not runtime).
 - Build verified locally (`npm run build`, / is server-rendered/dynamic).
+- v1.1: hotel name links to booking page; "Run screening now" button triggers
+  the sweep workflow via a server action (env `GH_DISPATCH_TOKEN`, a fine-grained
+  PAT with Actions:write). Button is UNAUTHENTICATED per owner choice.
+  Note: existing pre-#9 deals show no link until a fresh sweep re-upserts them
+  with booking_url.
 
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
