@@ -11,7 +11,16 @@ when a good one appears, and surfaces current deals on a dashboard.
 
 ## Status
 
-Pre-build. Design and feasibility grilling in progress — see [`NOTES.md`](./NOTES.md).
+Early build. Apollo feasibility solved and the **Apollo adapter is built**
+(`src/`, two-stage sweep, 12 passing unit tests). Sweep params locked: every
+30 min, 45-day horizon, durations {7, 14}. DB + email transport still being
+grilled — see [`NOTES.md`](./NOTES.md).
+
+```bash
+npm install
+npm test                 # pure logic, no network
+npm run sweep:apollo     # live sweep (needs: npx playwright install chromium)
+```
 
 ## Target sources & access reality (probed 2026-06-28)
 

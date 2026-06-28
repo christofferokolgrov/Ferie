@@ -74,30 +74,70 @@ same deal on every poll. Deal identity key:
 v1 = notify once per newly-seen qualifying deal (simple A). Re-notify-on-price-drop
 deferred to later.
 
+## Poll frequency + sweep scope — LOCKED 2026-06-28
+- **Poll frequency:** every **30 min** (cron concern, lives in the runner).
+- **Horizon:** **~45 days** ahead — truest last-minute window; further out is
+  mostly non-restplasser noise.
+- **Durations:** `durationGroup` **{7, 14}** (1 week + 2 weeks) — the two
+  dominant package lengths.
+- **Destinations:** all OSL destinations (free — the BFF returns them all per
+  date; no per-destination decision needed).
+
+### Two-stage sweep — the cost reframe (implemented)
+Naive "call /products for every calendar day × duration" = ~180 heavy calls per
+sweep (bot risk + cost driver). Avoided:
+- **Stage 1** — `cheapest` calendar, one cheap call per duration. Also reveals
+  the **actual departure dates** (charters fly only certain weekdays), so it
+  bounds stage 2.
+- **Stage 2** — `/products` once per *real* departure date (~30–40 calls total,
+  not 90). `/products` is the only endpoint carrying `BrochurePrice`, so this
+  gives **full coverage of BOTH deal rules** (no prefilter gap on the softer
+  70%-off rule) while staying light.
+
+This collapses a sweep to a handful of calls + one browser launch → broad scope
+costs almost nothing; the real constraint is signal/noise, not compute.
+
+## Apollo adapter — BUILT 2026-06-28
+Real adapter (not spike) under `src/`, pure logic separated from browser/network
+so it's unit-testable without a network (`node --test`, 12 passing):
+- `src/config.mjs`   — locked params (OSL, {7,14}, 45d, thresholds, endpoints).
+- `src/dates.mjs`    — pure date-window math.
+- `src/dealrule.mjs` — `normalizeProduct`, `evaluateDeal` (the locked rule),
+  `computeDiscount`, `seenKey` (the locked identity tuple).
+- `src/apollo.mjs`   — URL builders, response extractors, `sweepApollo()`
+  (orchestrator, takes an injected `fetchJson` → testable), `openApolloSession()`
+  (Playwright: clears CF once, exposes in-page `fetchJson`), `runApollo()`, CLI.
+- `test/` — `dealrule.test.mjs`, `apollo.test.mjs`.
+Run a live smoke test with `npm run sweep:apollo` (needs `playwright` installed
++ `npx playwright install chromium`). DB persistence + email are clean seams —
+the sweep just **returns** qualifying deals for now.
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.
-2. First source: **Apollo** — feasibility SOLVED (see Apollo spike above).
+2. First source: **Apollo** — feasibility SOLVED + **adapter built** (`src/`).
    Pattern: Playwright (headless, container, NO proxy) clears Cloudflare, then
-   call clean JSON BFF via in-page fetch. Working spike code in `spikes/apollo/`.
+   call clean JSON BFF via in-page fetch.
 3. Deal rule: email if `CurrentPricePerPerson < 3000` OR discount >= 70%.
-4. Notify immediately on first sighting; dedup via seen-key.
-5. Stack instinct: Playwright-in-a-container (Render ~$1/mo or existing Lightsail)
+4. Notify immediately on first sighting; dedup via seen-key
+   `(operator, accommodationCode, departureDate, duration)`.
+5. Sweep: every 30 min, 45-day horizon, durations {7,14}, two-stage (see above).
+6. Stack instinct: Playwright-in-a-container (Render ~$1/mo or existing Lightsail)
    + Supabase (DB + cron) + Vercel (read-only dashboard). Edge/serverless-scrape
    ruled out (CF needs a real browser).
-6. GitHub: private repo christofferokolgrov/Ferie, pushed.
+7. GitHub: private repo christofferokolgrov/Ferie, pushed.
 
 ### Still open (next grilling branches)
-- [ ] Poll frequency (how often the container sweep runs).
-- [ ] OSL sweep scope: which durations / how far ahead (90 days?) / all destinations.
 - [ ] Email transport: Resend free tier vs Microsoft 365 SMTP.
 - [ ] DB schema: deals table + seen table (fields from /products: name, stars,
-      beach dist, availability, prices).
-- [ ] Where the scraper actually runs (Render vs Lightsail) + how it's triggered.
+      beach dist, availability, prices). Adapter already emits these per deal.
+- [ ] Where the scraper actually runs (Render vs Lightsail) + how it's triggered
+      on the 30-min cadence.
 - [ ] Dashboard scope (what to show; auth needed or just private URL?).
 - [ ] Then: replicate for Ving (JS-rendered, /websearchresult) and TUI (Akamai —
       hardest, may need proxy).
 
 ### Next action
-Continue the grilling on poll frequency + sweep scope, then start building the
-Apollo adapter from `spikes/apollo/inpage.mjs`.
+Live-smoke the Apollo adapter against the real BFF (`npm run sweep:apollo`) to
+confirm the field shapes in `normalizeProduct` match production, then grill the
+DB schema + email transport so the sweep's returned deals have somewhere to go.
