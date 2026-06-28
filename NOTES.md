@@ -189,12 +189,27 @@ seats, "seen" freshness (stale rows dimmed >2h), and a "Book →" deep link.
 - Cron cadence 30 → **15 min** (`7,22,37,52 * * * *`). GitHub still delays
   scheduled runs, so effective cadence is looser.
 
-## Multi-source (Ving + TUI) — IN PROGRESS 2026-06-28
-Goal: add Ving and TUI alongside Apollo. Constraint: this dev env's proxy blocks
-ving.no/tui.no (403), so contracts can only be probed from GitHub Actions
-runners. Approach: source registry + resilient multi-source pipeline (a source
-that errors is skipped, others still run/email), adapters following the Apollo
-pattern, and a CI probe to capture real endpoint shapes.
+## Multi-source (Ving + TUI) — BUILT 2026-06-28
+Added Ving + TUI alongside Apollo. Constraint: dev-env proxy blocks ving.no/tui.no
+(403), so their request contracts can only be seen from GitHub Actions runners.
+- `src/sources.mjs` — registry + `sweepAllSources()`: runs each enabled source,
+  **resilient** (a source that throws is logged + skipped; others still run →
+  one broken source never blocks another's alert). Gate via `FERIE_SOURCES`
+  (default all three).
+- `src/browser.mjs` — generic headless session that captures the JSON responses
+  a page fetches (ride the site's own search XHRs instead of guessing requests).
+- `src/heuristic.mjs` — shape-agnostic offer extractor + `summarizeCaptured`.
+- `src/capture-source.mjs` — factory: load page → capture → parse → finalize.
+  Logs captured endpoints + a sample response when 0 qualify (self-diagnosing).
+- `src/ving.mjs`, `src/tui.mjs` — adapters (Ving `/restplass`; TUI `/siste-liten`,
+  behind Akamai so may be blocked from datacenter IP → skipped resiliently).
+- `src/dealrule.mjs` — `finalizeDeal()` shared by all sources.
+- `run.mjs` sweeps all sources; sweep.yml timeout 15→25 min.
+
+**NEXT (refinement loop, like Apollo's normalizeProduct):** first CI sweep logs
+`[ving]/[tui] captured … sample response …`. Read those, then replace the
+heuristic with an exact parser (+ OSL/date/pax filtering) per source. TUI may
+need a residential proxy if Akamai 403s the headless browser.
 
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far

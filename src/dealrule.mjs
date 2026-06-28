@@ -77,6 +77,14 @@ export function seenKey(p) {
   return [p.operator, p.accommodationCode, p.departureDate, p.durationGroup, p.pax].join('|');
 }
 
+/**
+ * Run the deal rule on a normalized product and attach the verdict + identity.
+ * Shared by all sources so every stored/emailed deal has the same shape.
+ */
+export function finalizeDeal(p) {
+  return { ...p, ...evaluateDeal(p), key: seenKey(p) };
+}
+
 function num(v) {
   if (v == null) return null;
   const n = typeof v === 'number' ? v : Number(v);
