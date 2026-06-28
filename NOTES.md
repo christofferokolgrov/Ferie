@@ -76,7 +76,7 @@ deferred to later.
 
 ## Poll frequency + sweep scope — LOCKED 2026-06-28
 - **Poll frequency:** every **30 min** (cron concern, lives in the runner).
-- **Horizon:** **~45 days** ahead — truest last-minute window; further out is
+- **Horizon:** **~50 days** ahead (was 45; bumped 2026-06-28) — truest last-minute window; further out is
   mostly non-restplasser noise.
 - **Durations:** `durationGroup` **{7, 14}** (1 week + 2 weeks) — the two
   dominant package lengths.
@@ -166,7 +166,7 @@ field is usually null (cosmetic; doesn't affect alerts).
 3. Deal rule: email if `CurrentPricePerPerson < 3000` OR discount >= 70%.
 4. Notify immediately on first sighting; dedup via seen-key
    `(operator, accommodationCode, departureDate, duration)`.
-5. Sweep: every 30 min, 45-day horizon, durations {7,14}, two-stage.
+5. Sweep: every 30 min, 50-day horizon, durations {7,14}, two-stage.
 6. Stack: Resend (email) + Supabase Postgres (DB) + GitHub Actions cron (runner).
    Vercel read-only dashboard still planned. Edge/serverless-scrape ruled out.
 7. GitHub: private repo christofferokolgrov/Ferie, pushed.
