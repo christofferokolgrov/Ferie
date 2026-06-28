@@ -95,6 +95,12 @@ export async function sweepApollo({ todayIso, fetchJson }) {
   const deals = [];
   let productCalls = 0;
   let departureDateCount = 0;
+  // Observability: distinguishes "no cheap deals right now" from "we're failing
+  // to read prices" (priced === 0 while productsSeen > 0 ⇒ field paths wrong).
+  let productsSeen = 0;
+  let priced = 0;
+  let minPricePerPerson = null;
+  let sampleRaw = null;
 
   for (const durationGroup of DURATION_GROUPS) {
     // Stage 1: cheap calendar call → which dates actually have departures.
@@ -114,7 +120,15 @@ export async function sweepApollo({ todayIso, fetchJson }) {
       );
       productCalls += 1;
       for (const raw of extractProducts(productsJson)) {
+        if (sampleRaw === null) sampleRaw = raw;
+        productsSeen += 1;
         const p = normalizeProduct(raw, { departureDate, durationGroup });
+        if (p.currentPricePerPerson != null) {
+          priced += 1;
+          if (minPricePerPerson === null || p.currentPricePerPerson < minPricePerPerson) {
+            minPricePerPerson = p.currentPricePerPerson;
+          }
+        }
         const evalResult = evaluateDeal(p);
         if (evalResult.qualifies) {
           deals.push({ ...p, ...evalResult, key: seenKey(p) });
@@ -123,12 +137,24 @@ export async function sweepApollo({ todayIso, fetchJson }) {
     }
   }
 
+  // When a sweep returns nothing, dump one raw product so a green-but-empty run
+  // is self-diagnosing: confirms whether prices are being parsed at all.
+  if (deals.length === 0 && sampleRaw !== null) {
+    console.error(
+      `[apollo] 0 qualifying. productsSeen=${productsSeen} priced=${priced} minPP=${minPricePerPerson}. sample raw product: ` +
+        JSON.stringify(sampleRaw).slice(0, 2000),
+    );
+  }
+
   return {
     deals,
     stats: {
       durationGroups: DURATION_GROUPS,
       departureDates: departureDateCount,
       productCalls,
+      productsSeen,
+      priced,
+      minPricePerPerson,
       qualifying: deals.length,
     },
   };
