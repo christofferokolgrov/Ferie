@@ -1,10 +1,10 @@
 name: Apollo sweep
 
-# Every 30 min (off-minute to avoid the cron rush; GitHub may delay busy runs).
+# Every 15 min (off-minutes to avoid the cron rush; GitHub may delay busy runs).
 # Also runnable on demand.
 on:
   schedule:
-    - cron: '7,37 * * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
 
 # Don't pile up overlapping sweeps if one runs long.

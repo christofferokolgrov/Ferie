@@ -1,6 +1,6 @@
 // Email layer: a pure formatter (unit-tested) + a Resend-backed sender.
 
-import { PAX_LABEL } from './config.mjs';
+import { PAX_LABEL, PRICE_PER_PERSON_THRESHOLD, DISCOUNT_THRESHOLD } from './config.mjs';
 
 const NOK = (n) =>
   n == null ? '–' : `${Math.round(n).toLocaleString('nb-NO')} kr`;
@@ -50,7 +50,7 @@ export function formatDealEmail(deals) {
   const html = `<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.5">
   <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo (Apollo):</p>
   <ul style="padding-left:18px">${items}</ul>
-  <p style="color:#777;font-size:12px">Rule: under 3000 kr/pp or ≥70% off. Brochure-price discounts can be inflated — eyeball before booking.</p>
+  <p style="color:#777;font-size:12px">Rule: under ${PRICE_PER_PERSON_THRESHOLD} kr/pp or ≥${Math.round(DISCOUNT_THRESHOLD * 100)}% off. Brochure-price discounts can be inflated — eyeball before booking.</p>
 </div>`;
 
   return { subject, text, html };

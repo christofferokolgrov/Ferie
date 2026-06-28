@@ -11,6 +11,7 @@ const PAX_LABEL = {
 };
 
 const STALE_MS = 2 * 60 * 60 * 1000; // not seen in last 2h → dim it
+const PP_THRESHOLD = 3500; // matches the scraper's PRICE_PER_PERSON_THRESHOLD
 
 const nok = (n) =>
   n == null ? '–' : `${Math.round(Number(n)).toLocaleString('nb-NO')} kr`;
@@ -62,7 +63,7 @@ export default async function Page() {
       <header>
         <h1>🏖️ Ferie — restplasser fra Oslo</h1>
         <div className="sub">
-          {deals.length} qualifying deal{deals.length === 1 ? '' : 's'} (under 3000 kr/pp or ≥70% off)
+          {deals.length} qualifying deal{deals.length === 1 ? '' : 's'} (under {PP_THRESHOLD} kr/pp or ≥70% off)
           {lastUpdated ? ` · last sweep ${fmtSeen(lastUpdated)}` : ''}
         </div>
         <RunButton />
@@ -93,7 +94,7 @@ export default async function Page() {
                 const stale = d.last_seen_at
                   ? Date.now() - new Date(d.last_seen_at).getTime() > STALE_MS
                   : true;
-                const cheap = d.current_price_per_person != null && Number(d.current_price_per_person) < 3000;
+                const cheap = d.current_price_per_person != null && Number(d.current_price_per_person) < PP_THRESHOLD;
                 const disc = d.discount != null ? Math.round(Number(d.discount) * 100) : null;
                 return (
                   <tr key={d.key} className={stale ? 'stale' : undefined}>

@@ -1,10 +1,11 @@
-// Locked sweep parameters for the Apollo adapter.
+// Locked sweep parameters (shared across sources).
 // Decisions made in the design grilling (see NOTES.md):
-//   - Poll every 30 min (cron concern; documented here for reference)
+//   - Poll every 15 min (cron concern; documented here for reference)
 //   - Horizon: ~50 days ahead
 //   - Durations: 1 week (7) and 2 weeks (14)
-//   - Deal rule: CurrentPricePerPerson < 3000 OR discount >= 70%
+//   - Deal rule: CurrentPricePerPerson < 3500 OR discount >= 70%
 
+// Default operator for the Apollo adapter. Other sources set their own.
 export const OPERATOR = 'apollo';
 
 // Departure airport we monitor.
@@ -32,10 +33,10 @@ export const PAX_LABEL = Object.fromEntries(
 );
 
 // Cron cadence — informational; the schedule lives in the runner, not here.
-export const POLL_INTERVAL_MIN = 30;
+export const POLL_INTERVAL_MIN = 15;
 
 // Deal rule thresholds (NOK).
-export const PRICE_PER_PERSON_THRESHOLD = 3000; // absolute, trustworthy
+export const PRICE_PER_PERSON_THRESHOLD = 3500; // absolute, trustworthy
 export const DISCOUNT_THRESHOLD = 0.7; // softer "look at this" flag
 
 // Endpoints / browser identity (from the resolved Apollo spike).
