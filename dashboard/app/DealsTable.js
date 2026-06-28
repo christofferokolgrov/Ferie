@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import {
-  nok, fmtDate, fmtSeen, returnDate, savings,
-  PP_THRESHOLD, STALE_MS, NEW_MS, PAX_LABEL, OPERATOR_LABEL,
+  nok, fmtDate, fmtSeen, returnDate, savings, ppThreshold,
+  STALE_MS, NEW_MS, PAX_LABEL, OPERATOR_LABEL,
 } from './format';
 
 // Column definitions. `get` is the sort accessor; `num` marks numeric sort.
@@ -72,7 +72,7 @@ export default function DealsTable({ deals, now }) {
           {rows.map((d) => {
             const stale = d.last_seen_at ? now - new Date(d.last_seen_at).getTime() > STALE_MS : true;
             const isNew = d.first_seen_at ? now - new Date(d.first_seen_at).getTime() < NEW_MS : false;
-            const cheap = d.current_price_per_person != null && Number(d.current_price_per_person) < PP_THRESHOLD;
+            const cheap = d.current_price_per_person != null && Number(d.current_price_per_person) < ppThreshold(d);
             const disc = d.discount != null ? Math.round(Number(d.discount) * 100) : null;
             const sav = savings(d);
             const ret = returnDate(d.departure_date, d.duration_group);

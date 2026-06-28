@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import RunButton from './RunButton';
 import DealsTable from './DealsTable';
-import { fmtSeen, PP_THRESHOLD } from './format';
+import { fmtSeen, PP_THRESHOLD, PP_THRESHOLD_4STAR, PP_THRESHOLD_AI } from './format';
 
 // Always fetch fresh on each request (low traffic; we want current deals).
 export const dynamic = 'force-dynamic';
@@ -35,7 +35,7 @@ export default async function Page() {
       <header>
         <h1>🏖️ Ferie — restplasser fra Oslo</h1>
         <div className="sub">
-          {deals.length} qualifying deal{deals.length === 1 ? '' : 's'} (under {PP_THRESHOLD} kr/pp or ≥70% off)
+          {deals.length} qualifying deal{deals.length === 1 ? '' : 's'} (under {PP_THRESHOLD} kr/pp · 4★+ {PP_THRESHOLD_4STAR} · all-incl {PP_THRESHOLD_AI}, or ≥70% off)
           {lastUpdated ? ` · last sweep ${fmtSeen(lastUpdated, now)}` : ''} · click a column to sort
         </div>
         <RunButton />

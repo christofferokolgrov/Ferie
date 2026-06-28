@@ -35,8 +35,13 @@ export const PAX_LABEL = Object.fromEntries(
 // Cron cadence — informational; the schedule lives in the runner, not here.
 export const POLL_INTERVAL_MIN = 15;
 
-// Deal rule thresholds (NOK).
-export const PRICE_PER_PERSON_THRESHOLD = 3500; // absolute, trustworthy
+// Deal rule thresholds (NOK). The per-person bar is tiered: a pricier package
+// still counts if it's high-star or all-inclusive. The highest applicable tier
+// wins (e.g. a 4★ all-inclusive uses the all-inclusive bar).
+export const PRICE_PER_PERSON_THRESHOLD = 3500; // base
+export const PRICE_PP_THRESHOLD_4STAR = 4500; // when stars >= STAR_THRESHOLD
+export const PRICE_PP_THRESHOLD_ALL_INCLUSIVE = 6000; // when meal plan is all-inclusive
+export const STAR_THRESHOLD = 4;
 export const DISCOUNT_THRESHOLD = 0.7; // softer "look at this" flag
 
 // Endpoints / browser identity (from the resolved Apollo spike).
