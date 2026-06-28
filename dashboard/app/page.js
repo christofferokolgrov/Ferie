@@ -32,19 +32,23 @@ export default async function Page() {
 
   return (
     <main>
-      <header>
-        <h1>🏖️ Ferie — restplasser fra Oslo</h1>
-        <div className="sub">
-          {deals.length} qualifying deal{deals.length === 1 ? '' : 's'} (under {PP_THRESHOLD} kr/pp · 4★+ {PP_THRESHOLD_4STAR} · all-incl {PP_THRESHOLD_AI}, or ≥70% off)
-          {lastUpdated ? ` · last sweep ${fmtSeen(lastUpdated, now)}` : ''} · click a column to sort
+      <div className="topbar">
+        <div>
+          <h1>🏖️ Ferie — restplasser fra Oslo</h1>
+          <div className="sub">
+            {deals.length} qualifying deal{deals.length === 1 ? '' : 's'}
+            {lastUpdated ? ` · last sweep ${fmtSeen(lastUpdated, now)}` : ''}
+            <br />
+            under {PP_THRESHOLD} kr/pp · 4★+ {PP_THRESHOLD_4STAR} · all-incl {PP_THRESHOLD_AI} · or ≥70% off
+          </div>
         </div>
         <RunButton />
-      </header>
+      </div>
 
       {error ? (
-        <div className="table-wrap"><div className="error">⚠️ {error}</div></div>
+        <div className="error">⚠️ {error}</div>
       ) : deals.length === 0 ? (
-        <div className="table-wrap"><div className="empty">No deals stored yet. The next sweep will populate this.</div></div>
+        <div className="empty">No deals stored yet. The next sweep will populate this.</div>
       ) : (
         <DealsTable deals={deals} now={now} />
       )}
