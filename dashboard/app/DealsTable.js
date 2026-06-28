@@ -1,116 +1,113 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   nok, fmtDate, fmtSeen, returnDate, savings, ppThreshold,
   STALE_MS, NEW_MS, PAX_LABEL, OPERATOR_LABEL,
 } from './format';
 
-// Column definitions. `get` is the sort accessor; `num` marks numeric sort.
-const COLUMNS = [
-  { key: 'hotel', label: 'Hotel', get: (d) => (d.hotel ?? d.accommodation_code ?? '').toLowerCase() },
-  { key: 'destination', label: 'Destination', get: (d) => d.destination ?? '' },
-  { key: 'operator', label: 'Source', get: (d) => d.operator ?? '' },
-  { key: 'pp', label: 'Pr. person', num: true, get: (d) => d.current_price_per_person },
-  { key: 'savings', label: 'Savings', num: true, get: (d) => savings(d) },
-  { key: 'discount', label: 'Discount', num: true, get: (d) => d.discount },
-  { key: 'departure', label: 'Departure', get: (d) => d.departure_date ?? '' },
-  { key: 'duration', label: 'Days', num: true, get: (d) => d.duration_group },
-  { key: 'meal', label: 'Meal', get: (d) => d.meal_plan ?? '' },
-  { key: 'pax', label: 'Party', sortable: false },
-  { key: 'availability', label: 'Seats', num: true, get: (d) => d.availability },
-  { key: 'seen', label: 'Seen', num: true, get: (d) => (d.last_seen_at ? new Date(d.last_seen_at).getTime() : 0) },
-  { key: 'book', label: '', sortable: false },
+// Sort options each imply a sensible direction — no separate asc/desc toggle.
+const SORTS = [
+  { key: 'cheapest', label: 'Cheapest', cmp: (a, b) => n(a.current_price_per_person) - n(b.current_price_per_person) },
+  { key: 'discount', label: 'Biggest discount', cmp: (a, b) => n(b.discount) - n(a.discount) },
+  { key: 'savings', label: 'Biggest savings', cmp: (a, b) => n(savings(b)) - n(savings(a)) },
+  { key: 'soonest', label: 'Soonest departure', cmp: (a, b) => String(a.departure_date ?? '').localeCompare(String(b.departure_date ?? '')) },
+  { key: 'newest', label: 'Recently added', cmp: (a, b) => t(b.first_seen_at) - t(a.first_seen_at) },
 ];
 
-function sortDeals(deals, key, dir) {
-  const col = COLUMNS.find((c) => c.key === key);
-  if (!col || !col.get) return deals;
-  const mul = dir === 'asc' ? 1 : -1;
-  return [...deals].sort((a, b) => {
-    const av = col.get(a), bv = col.get(b);
-    const an = av == null || av === '', bn = bv == null || bv === '';
-    if (an && bn) return 0;
-    if (an) return 1; // nulls always last
-    if (bn) return -1;
-    if (col.num) return (Number(av) - Number(bv)) * mul;
-    return String(av).localeCompare(String(bv), 'nb') * mul;
-  });
-}
+const n = (v) => (v == null ? Infinity : Number(v)); // nulls sort last for asc-style
+const t = (v) => (v ? new Date(v).getTime() : 0);
 
 export default function DealsTable({ deals, now }) {
-  const [sort, setSort] = useState({ key: 'pp', dir: 'asc' });
+  const [sortKey, setSortKey] = useState('cheapest');
+  const [source, setSource] = useState('all');
 
-  function clickHeader(col) {
-    if (col.sortable === false) return;
-    setSort((s) =>
-      s.key === col.key ? { key: col.key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: col.num ? 'asc' : 'asc' },
-    );
-  }
+  const sources = useMemo(
+    () => ['all', ...Array.from(new Set(deals.map((d) => d.operator).filter(Boolean)))],
+    [deals],
+  );
 
-  const rows = sortDeals(deals, sort.key, sort.dir);
-  const arrow = (col) => (sort.key === col.key ? (sort.dir === 'asc' ? ' ▲' : ' ▼') : '');
+  const shown = useMemo(() => {
+    const cmp = (SORTS.find((s) => s.key === sortKey) ?? SORTS[0]).cmp;
+    return deals.filter((d) => source === 'all' || d.operator === source).slice().sort(cmp);
+  }, [deals, sortKey, source]);
 
   return (
-    <div className="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            {COLUMNS.map((col) => (
-              <th
-                key={col.key}
-                onClick={() => clickHeader(col)}
-                className={col.sortable === false ? '' : 'sortable'}
-                aria-sort={sort.key === col.key ? (sort.dir === 'asc' ? 'ascending' : 'descending') : undefined}
-              >
-                {col.label}{arrow(col)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((d) => {
-            const stale = d.last_seen_at ? now - new Date(d.last_seen_at).getTime() > STALE_MS : true;
-            const isNew = d.first_seen_at ? now - new Date(d.first_seen_at).getTime() < NEW_MS : false;
-            const cheap = d.current_price_per_person != null && Number(d.current_price_per_person) < ppThreshold(d);
-            const disc = d.discount != null ? Math.round(Number(d.discount) * 100) : null;
-            const sav = savings(d);
-            const ret = returnDate(d.departure_date, d.duration_group);
-            const name = d.hotel ?? d.accommodation_code ?? 'Unknown';
-            return (
-              <tr key={d.key} className={stale ? 'stale' : undefined}>
-                <td className="hotel">
-                  <div className="name">
-                    {isNew && <span className="badge new">NEW</span>}{' '}
-                    {d.booking_url ? (
-                      <a className="hotel-link" href={d.booking_url} target="_blank" rel="noreferrer">{name}</a>
-                    ) : name}
-                    {d.stars ? ` ★${d.stars}` : ''}
-                  </div>
-                </td>
-                <td className="dest">{d.destination ?? '–'}</td>
-                <td><span className={`badge src src-${d.operator}`}>{OPERATOR_LABEL[d.operator] ?? d.operator ?? '–'}</span></td>
-                <td>
-                  <span className={`pp${cheap ? ' cheap' : ''}`}>{nok(d.current_price_per_person)}</span>
-                  <div className="total">total {nok(d.current_price)}</div>
-                </td>
-                <td>{sav != null ? <span className="save">−{nok(sav)}</span> : '–'}</td>
-                <td>{disc != null ? <span className="badge disc">{disc}% off</span> : '–'}</td>
-                <td>
-                  {fmtDate(d.departure_date)}
-                  {ret && <div className="total">→ {fmtDate(ret)}</div>}
-                </td>
-                <td>{d.duration_group ?? '–'}</td>
-                <td>{d.meal_plan ? <span className="badge meal">{d.meal_plan}</span> : '–'}</td>
-                <td>{PAX_LABEL[d.pax] ?? d.pax ?? '–'}</td>
-                <td className={d.availability != null && d.availability <= 2 ? 'seats-low' : undefined}>{d.availability ?? '–'}</td>
-                <td>{fmtSeen(d.last_seen_at, now)}</td>
-                <td>{d.booking_url ? <a className="book" href={d.booking_url} target="_blank" rel="noreferrer">Book →</a> : '–'}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div className="controls">
+        <div className="chips">
+          {sources.map((s) => (
+            <button
+              key={s}
+              className={`chip${source === s ? ' on' : ''}`}
+              onClick={() => setSource(s)}
+            >
+              {s === 'all' ? 'All' : OPERATOR_LABEL[s] ?? s}
+            </button>
+          ))}
+        </div>
+        <label className="sortby">
+          Sort
+          <select value={sortKey} onChange={(e) => setSortKey(e.target.value)}>
+            {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <div className="grid">
+        {shown.map((d) => <Card key={d.key} d={d} now={now} />)}
+      </div>
+      {shown.length === 0 && <div className="empty">No deals match this filter.</div>}
+    </>
+  );
+}
+
+function Card({ d, now }) {
+  const stale = d.last_seen_at ? now - new Date(d.last_seen_at).getTime() > STALE_MS : true;
+  const isNew = d.first_seen_at ? now - new Date(d.first_seen_at).getTime() < NEW_MS : false;
+  const cheap = d.current_price_per_person != null && Number(d.current_price_per_person) < ppThreshold(d);
+  const disc = d.discount != null ? Math.round(Number(d.discount) * 100) : null;
+  const sav = savings(d);
+  const ret = returnDate(d.departure_date, d.duration_group);
+  const name = d.hotel ?? d.accommodation_code ?? 'Unknown';
+  const lowSeats = d.availability != null && d.availability <= 2;
+
+  return (
+    <article className={`card${stale ? ' stale' : ''}`}>
+      <div className="card-top">
+        <div className="title">
+          <h3>
+            {d.booking_url ? <a href={d.booking_url} target="_blank" rel="noreferrer">{name}</a> : name}
+          </h3>
+          <div className="sub">
+            {d.stars ? <span className="stars">{'★'.repeat(Math.round(Number(d.stars)))}</span> : null}
+            {d.destination ? <span className="dest">{d.destination}</span> : null}
+          </div>
+        </div>
+        <span className={`src src-${d.operator}`}>{OPERATOR_LABEL[d.operator] ?? d.operator}</span>
+      </div>
+
+      <div className="price">
+        <span className={`pp${cheap ? ' cheap' : ''}`}>{nok(d.current_price_per_person)}</span>
+        <span className="per">/pp</span>
+        {disc != null && <span className="disc">{disc}% off</span>}
+        {isNew && <span className="new">NEW</span>}
+      </div>
+      <div className="price-sub">
+        total {nok(d.current_price)}{sav != null && <> · <span className="save">save {nok(sav)}</span></>}
+      </div>
+
+      <dl className="facts">
+        <div><dt>When</dt><dd>{fmtDate(d.departure_date)}{ret && ` → ${fmtDate(ret)}`} · {d.duration_group ?? '?'}d</dd></div>
+        <div><dt>Board</dt><dd>{d.meal_plan ?? '–'}</dd></div>
+        <div><dt>Party</dt><dd>{PAX_LABEL[d.pax] ?? d.pax ?? '–'}</dd></div>
+        <div><dt>Seats</dt><dd className={lowSeats ? 'low' : ''}>{d.availability ?? '–'}{lowSeats ? ' left!' : ''}</dd></div>
+      </dl>
+
+      <div className="card-foot">
+        <span className="seen">{fmtSeen(d.last_seen_at, now)}</span>
+        {d.booking_url && <a className="book" href={d.booking_url} target="_blank" rel="noreferrer">Book →</a>}
+      </div>
+    </article>
   );
 }
