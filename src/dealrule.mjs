@@ -108,10 +108,21 @@ export function seenKey(p) {
   return [p.operator, p.accommodationCode, p.departureDate, p.durationGroup, p.pax].join('|');
 }
 
-function num(v) {
+/** Null-safe numeric coercion → number or null. Shared by all source adapters. */
+export function num(v) {
   if (v == null) return null;
   const n = typeof v === 'number' ? v : Number(v);
   return Number.isFinite(n) ? n : null;
+}
+
+/**
+ * Join location parts into the dashboard's destination format ("A – B"),
+ * trimming blanks and de-duplicating. Shared by every source so the column
+ * format is decided in one place.
+ */
+export function joinDestination(...parts) {
+  const uniq = [...new Set(parts.map((s) => (s ?? '').trim()).filter(Boolean))];
+  return uniq.length ? uniq.join(' – ') : null;
 }
 
 /**
@@ -121,8 +132,8 @@ function num(v) {
 export function extractDestination(content) {
   const bc = content?.LocationBreadcrumbs;
   if (Array.isArray(bc) && bc.length) {
-    const parts = (bc.length > 1 ? bc.slice(1) : bc).filter(Boolean);
-    if (parts.length) return parts.join(' – ');
+    const dest = joinDestination(...(bc.length > 1 ? bc.slice(1) : bc));
+    if (dest) return dest;
   }
   return content?.Destination ?? content?.Country ?? null;
 }

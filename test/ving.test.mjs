@@ -89,7 +89,7 @@ test('normalizeVingTrip maps to the shared deal shape, per person, no discount',
   assert.equal(p.durationGroup, 8);
   assert.equal(p.pax, '2v');
   assert.equal(p.currentPricePerPerson, 2890);
-  assert.equal(p.currentPrice, 2890 * 2); // per-person × headcount (Ving convention)
+  assert.equal(p.currentPrice, null); // Ving quotes per-person only; no fabricated total
   assert.equal(p.availability, 6);
   assert.equal(p.brochurePrice, null); // no list price → discount never computable
   assert.equal(p.mealPlan, null);
