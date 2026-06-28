@@ -27,10 +27,56 @@ export const PAX_CONFIGS = [
   { key: '4v2b', label: '4 voksne + 2 barn (9, 12)', paxAges: '18,18,18,18,9,12' },
 ];
 
+// ---------------------------------------------------------------------------
+// Ving source (see spikes/ving/README.md for the reverse-engineered contract).
+// Ving's restplass search is a GraphQL API with NO pax argument — prices are
+// strictly per person ("Prisene gjelder for én voksen i delt dobbeltrom"), and
+// there is no brochure/original price, so for Ving only the absolute price rule
+// can fire (the 70%-off discount rule never applies — no list price exists).
+// ---------------------------------------------------------------------------
+export const VING_OPERATOR = 'ving';
+export const VING_PAGE_URL = 'https://www.ving.no/restplasser';
+export const VING_ORIGO_URL = 'https://origo-sc.nltg.com/';
+export const VING_MARKET_UNIT = 'vn'; // siteId 3 → mucd 'vn' (Norway)
+export const VING_CALLER_APP = 'lastminutesales';
+export const VING_BOOKING_BASE = 'https://www.ving.no/restplass-hotell';
+export const VING_PAGE_SIZE = 40; // `first:` per GraphQL page
+
+// We monitor PACKAGE deals only (fly + hotell), never flight-only seats.
+export const VING_TRIP_TYPE = 'SPECIFIED';
+
+// Party configurations for Ving. Because price is per person and party-
+// INDEPENDENT, parties differ only by CAPACITY: a restplass must have enough
+// free seats to fit the party. `size` = required free seats; `roomAges` feeds
+// Ving's QueryRoomAges in the booking deep-link (adults coded as age 42, kids
+// by real age). Keep `key` stable — it's part of the dedup identity.
+export const VING_PAX_CONFIGS = [
+  { key: '2v', label: '2 voksne', size: 2, roomAges: '42,42' },
+  { key: '4v', label: '4 voksne', size: 4, roomAges: '42,42,42,42' },
+  { key: '4v2b', label: '4 voksne + 2 barn (9, 12)', size: 6, roomAges: '42,42,42,42,9,12' },
+];
+
 // Friendly label lookup for emails/dashboard, keyed by the stable pax key.
+// Covers every party key used by any source (Apollo + Ving).
 export const PAX_LABEL = Object.fromEntries(
-  PAX_CONFIGS.map((p) => [p.key, p.label]),
+  [...PAX_CONFIGS, ...VING_PAX_CONFIGS].map((p) => [p.key, p.label]),
 );
+
+// ---------------------------------------------------------------------------
+// Finn.no aggregator source (see spikes/finn/README.md). Reaches operators we
+// can't scrape directly — primarily TUI (tui.no hard-blocks datacenter IPs),
+// plus the small charter brands amisol & nazar. We deliberately EXCLUDE apollo
+// & ving here: the direct adapters are richer/fresher (Apollo exposes
+// BrochurePrice → discount rule; Ving exposes free seats → party capacity).
+// Finn carries neither, so for its operators ONLY the absolute price/pp rule
+// applies and party is not modelled (pax = null). Reachable with a plain fetch
+// — no browser, no proxy.
+// ---------------------------------------------------------------------------
+export const FINN_API = 'https://www.finn.no/travel-api/lms/offers';
+// Operators sourced via Finn. NOT apollo/ving (those have direct adapters).
+export const FINN_OPERATORS = ['tui', 'amisol', 'nazar'];
+// Finn's trip-type value for fly+hotel packages (we monitor packages only).
+export const FINN_TRIP_TYPE = 'spesifisert';
 
 // Cron cadence — informational; the schedule lives in the runner, not here.
 export const POLL_INTERVAL_MIN = 15;

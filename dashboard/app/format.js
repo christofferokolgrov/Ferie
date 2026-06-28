@@ -24,7 +24,7 @@ export const PAX_LABEL = {
   '4v2b': '4 voksne + 2 barn',
 };
 
-export const OPERATOR_LABEL = { apollo: 'Apollo', ving: 'Ving', tui: 'TUI' };
+export const OPERATOR_LABEL = { apollo: 'Apollo', ving: 'Ving', tui: 'TUI', amisol: 'Amisol', nazar: 'Nazar' };
 
 export const nok = (n) =>
   n == null ? '–' : `${Math.round(Number(n)).toLocaleString('nb-NO')} kr`;
