@@ -157,6 +157,15 @@ discount ~43% (< 70%). System is live on the 30-min cron.
 Note: Apollo exposes `Content.DistanceToCenter`, not `DistanceToBeach` → that
 field is usually null (cosmetic; doesn't affect alerts).
 
+## Reliability hardening — 2026-06-28
+First scheduled runs exposed a fragility: a sweep is ~230 sequential in-page BFF
+calls, and a single transient `page.evaluate: TypeError: Failed to fetch` (network
+blip / momentary CF re-challenge) aborted the WHOLE sweep (runs #6, #7 failed this
+way). Fixed: `fetchJson` now retries a call 3× with backoff (1s, 2s); `sweepApollo`
+catches a still-failing cheapest/products call, counts it (`stats.failedCalls`),
+logs it, and continues instead of crashing. First real deals delivered run #8
+(Malia Princess 2892/pp; Monte Feliz 76% off — both family-config hits).
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.

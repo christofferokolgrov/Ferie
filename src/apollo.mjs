@@ -101,26 +101,44 @@ export async function sweepApollo({ todayIso, fetchJson }) {
   let priced = 0;
   let minPricePerPerson = null;
   let sampleRaw = null;
+  // A sweep is ~230 sequential BFF calls; transient single-call failures are
+  // expected. Tolerate them (skip that date/combo, keep going) rather than
+  // aborting the whole sweep — and count them so we notice if it's widespread.
+  let failedCalls = 0;
 
   // Sweep each party configuration independently: per-person price and
   // availability differ by party, so the same hotel/date is a distinct deal.
   for (const pax of PAX_CONFIGS) {
     for (const durationGroup of DURATION_GROUPS) {
       // Stage 1: cheap calendar call → which dates actually have departures.
-      const cheapest = await fetchJson(
-        buildCheapestUrl({ durationGroup, ...window, paxAges: pax.paxAges }),
-        body,
-      );
-      const dates = extractDepartureDates(cheapest);
+      let dates;
+      try {
+        const cheapest = await fetchJson(
+          buildCheapestUrl({ durationGroup, ...window, paxAges: pax.paxAges }),
+          body,
+        );
+        dates = extractDepartureDates(cheapest);
+      } catch (err) {
+        failedCalls += 1;
+        console.error(`[apollo] cheapest failed (pax=${pax.key} dg=${durationGroup}): ${err.message ?? err}`);
+        continue; // skip this party/duration; other combos still run
+      }
       departureDateCount += dates.length;
 
       // Stage 2: one /products call per real departure date → full price detail
       // (BrochurePrice lives only here), evaluate both deal rules per product.
       for (const departureDate of dates) {
-        const productsJson = await fetchJson(
-          buildProductsUrl({ durationGroup, departureDate, paxAges: pax.paxAges }),
-          body,
-        );
+        let productsJson;
+        try {
+          productsJson = await fetchJson(
+            buildProductsUrl({ durationGroup, departureDate, paxAges: pax.paxAges }),
+            body,
+          );
+        } catch (err) {
+          failedCalls += 1;
+          console.error(`[apollo] products failed (pax=${pax.key} dg=${durationGroup} date=${departureDate}): ${err.message ?? err}`);
+          continue; // skip this date; the rest of the sweep continues
+        }
         productCalls += 1;
         for (const raw of extractProducts(productsJson)) {
           if (sampleRaw === null) sampleRaw = raw;
@@ -157,6 +175,7 @@ export async function sweepApollo({ todayIso, fetchJson }) {
       durationGroups: DURATION_GROUPS,
       departureDates: departureDateCount,
       productCalls,
+      failedCalls,
       productsSeen,
       priced,
       minPricePerPerson,
@@ -192,7 +211,7 @@ export async function openApolloSession() {
   await page.goto(PAGE_URL, { waitUntil: 'domcontentloaded', timeout: 45000 });
   await page.waitForTimeout(CF_SETTLE_MS); // let CF clearance settle
 
-  const fetchJson = (url, body) =>
+  const callOnce = (url, body) =>
     page.evaluate(
       async ({ u, b }) => {
         const r = await fetch(u, {
@@ -206,6 +225,21 @@ export async function openApolloSession() {
       },
       { u: url, b: body },
     );
+
+  // Retry a single call on transient failures (network blip / momentary CF
+  // re-challenge) with backoff, before letting the sweep skip it.
+  const fetchJson = async (url, body, attempts = 3) => {
+    let lastErr;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await callOnce(url, body);
+      } catch (err) {
+        lastErr = err;
+        if (i < attempts - 1) await page.waitForTimeout(1000 * 2 ** i); // 1s, 2s
+      }
+    }
+    throw lastErr;
+  };
 
   return { fetchJson, close: () => browser.close() };
 }
