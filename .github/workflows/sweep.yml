@@ -1,4 +1,4 @@
-name: Apollo sweep
+name: Ferie sweep
 
 # Every 15 min (off-minutes to avoid the cron rush; GitHub may delay busy runs).
 # Also runnable on demand.
@@ -9,7 +9,7 @@ on:
 
 # Don't pile up overlapping sweeps if one runs long.
 concurrency:
-  group: apollo-sweep
+  group: ferie-sweep
   cancel-in-progress: false
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
       - name: Install Chromium for Playwright
         run: npx playwright install --with-deps chromium
 
-      - name: Run Apollo sweep
+      - name: Run sweep (all sources)
         run: node src/run.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

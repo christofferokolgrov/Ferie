@@ -43,6 +43,30 @@ test('booking link appears in text and html when present', () => {
   assert.match(html, /Book on Apollo/);
 });
 
+test('booking link names the deal’s actual operator (not always Apollo)', () => {
+  const ving = { ...base, operator: 'ving', bookingUrl: 'https://www.ving.no/restplass-hotell?x=1' };
+  const tui = { ...base, operator: 'tui', bookingUrl: 'https://www.tui.no/bestill?p=2' };
+  const { html } = formatDealEmail([ving, tui]);
+  assert.match(html, /Book on Ving →/);
+  assert.match(html, /Book on TUI →/);
+  assert.doesNotMatch(html, /Book on Apollo/); // neither deal is Apollo
+});
+
+test('header no longer hard-codes Apollo (multi-source)', () => {
+  const { html } = formatDealEmail([{ ...base, operator: 'ving' }]);
+  assert.doesNotMatch(html, /\(Apollo\)/);
+  assert.match(html, /from Oslo:/);
+});
+
+test('multi-deal subject omits price when no deal has a per-person price', () => {
+  const a = { ...base, accommodationCode: 'A', currentPricePerPerson: null };
+  const b = { ...base, accommodationCode: 'B', currentPricePerPerson: null };
+  const { subject } = formatDealEmail([a, b]);
+  assert.match(subject, /2 restplasser fra OSL/);
+  assert.doesNotMatch(subject, /∞/); // no Infinity leak
+  assert.doesNotMatch(subject, /fra .* kr/);
+});
+
 test('multi-deal subject shows count and cheapest pp', () => {
   const cheaper = { ...base, accommodationCode: 'AC2', hotel: 'Hotel Mar', currentPricePerPerson: 1990 };
   const { subject, text, html } = formatDealEmail([base, cheaper]);

@@ -1,6 +1,6 @@
 'use server';
 
-// Server action: trigger the Apollo sweep GitHub Actions workflow (workflow_dispatch).
+// Server action: trigger the Ferie sweep GitHub Actions workflow (workflow_dispatch).
 // Runs only on the server, so the token never reaches the browser.
 export async function triggerSweep() {
   const token = process.env.GH_DISPATCH_TOKEN;

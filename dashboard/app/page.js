@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import RunButton from './RunButton';
 import DealsTable from './DealsTable';
-import { fmtSeen, PP_THRESHOLD, PP_THRESHOLD_4STAR, PP_THRESHOLD_AI } from './format';
+import { fmtSeen, PP_THRESHOLD, PP_THRESHOLD_4STAR, PP_THRESHOLD_AI, DEAL_TTL_HOURS } from './format';
 
 // Always fetch fresh on each request (low traffic; we want current deals).
 export const dynamic = 'force-dynamic';
@@ -13,9 +13,11 @@ async function getDeals() {
     return { deals: [], error: 'Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY env vars.' };
   }
   const supabase = createClient(url, key, { auth: { persistSession: false } });
+  const cutoff = new Date(Date.now() - DEAL_TTL_HOURS * 3600_000).toISOString();
   const { data, error } = await supabase
     .from('deals')
     .select('*')
+    .gt('last_seen_at', cutoff) // hide deals that have aged out (also pruned server-side)
     .order('current_price_per_person', { ascending: true, nullsFirst: false })
     .limit(500);
   if (error) return { deals: [], error: error.message };
