@@ -1,5 +1,7 @@
-// Orchestration: sweep → keep dashboard fresh → dedup → email new deals.
+// Orchestration: sweep → keep dashboard fresh → prune stale → dedup → email new deals.
 // Fully testable: sweep, store and mailer are injected.
+
+import { DEAL_TTL_HOURS } from './config.mjs';
 
 /**
  * @param {object}   deps
@@ -15,6 +17,14 @@ export async function runPipeline({ sweep, store, mailer, log = console.error })
 
   // Keep every currently-qualifying deal in the store (dashboard data source).
   await store.upsertDeals(deals);
+
+  // Prune deals that have dropped off every source (not re-seen within the TTL),
+  // so the dashboard doesn't accumulate stale ghosts. Runs every sweep; only
+  // removes rows older than the window, so a transient empty sweep is harmless.
+  if (typeof store.deleteStale === 'function') {
+    const cutoff = new Date(Date.now() - DEAL_TTL_HOURS * 3600_000).toISOString();
+    await store.deleteStale(cutoff);
+  }
 
   // Notify once per newly-seen deal (NOTES policy v1).
   const seenKeys = await store.getSeenKeys(deals.map((d) => d.key));

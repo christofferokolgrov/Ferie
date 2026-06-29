@@ -2,13 +2,16 @@
 
 import {
   PAX_LABEL,
+  OPERATOR_LABEL,
   PRICE_PER_PERSON_THRESHOLD,
   PRICE_PP_THRESHOLD_4STAR,
   PRICE_PP_THRESHOLD_ALL_INCLUSIVE,
   DISCOUNT_THRESHOLD,
 } from './config.mjs';
-import { couponSummary } from './coupons.mjs';
+import { COUPONS, couponSummary } from './coupons.mjs';
 import { isoDate } from './dates.mjs';
+
+const operatorName = (op) => OPERATOR_LABEL[op] ?? op ?? 'operatør';
 
 const NOK = (n) =>
   n == null ? '–' : `${Math.round(n).toLocaleString('nb-NO')} kr`;
@@ -43,17 +46,16 @@ export function formatDealLine(d, today) {
  */
 export function formatDealEmail(deals, today) {
   const n = deals.length;
-  const cheapest = deals.reduce(
-    (min, d) =>
-      d.currentPricePerPerson != null && d.currentPricePerPerson < min
-        ? d.currentPricePerPerson
-        : min,
-    Infinity,
-  );
+  const prices = deals
+    .map((d) => d.currentPricePerPerson)
+    .filter((p) => p != null && Number.isFinite(Number(p)));
+  const cheapest = prices.length ? Math.min(...prices.map(Number)) : null;
   const subject =
     n === 1
       ? `🏖️ Restplass: ${deals[0].hotel ?? 'deal'} — ${NOK(deals[0].currentPricePerPerson)}/pp`
-      : `🏖️ ${n} restplasser fra OSL — fra ${NOK(cheapest)}/pp`;
+      : cheapest != null
+        ? `🏖️ ${n} restplasser fra OSL — fra ${NOK(cheapest)}/pp`
+        : `🏖️ ${n} restplasser fra OSL`;
 
   const text = [
     `${n} new qualifying deal${n === 1 ? '' : 's'} from Oslo:`,
@@ -65,16 +67,17 @@ export function formatDealEmail(deals, today) {
     .map((d) => {
       const line = escapeHtml(formatDealLine(d, today));
       const link = d.bookingUrl
-        ? ` <a href="${escapeHtml(d.bookingUrl)}">Book on Apollo →</a>`
+        ? ` <a href="${escapeHtml(d.bookingUrl)}">Book on ${escapeHtml(operatorName(d.operator))} →</a>`
         : '';
       return `<li style="margin:0 0 10px">${line}${link}</li>`;
     })
     .join('');
+  const couponNames = [...new Set(COUPONS.map((c) => c.label))].join(', ');
   const html = `<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.5">
-  <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo (Apollo):</p>
+  <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo:</p>
   <ul style="padding-left:18px">${items}</ul>
   <p style="color:#777;font-size:12px">Rule: under ${PRICE_PER_PERSON_THRESHOLD} kr/pp (4★+ ${PRICE_PP_THRESHOLD_4STAR}, all-inclusive ${PRICE_PP_THRESHOLD_ALL_INCLUSIVE}) or ≥${Math.round(DISCOUNT_THRESHOLD * 100)}% off. Brochure-price discounts can be inflated — eyeball before booking.</p>
-  <p style="color:#777;font-size:12px">«Stackbare kuponger» er medlemsrabatter (OBOS, Studentpakken, NAF, Trumf) som <em>antas</em> å kunne legges oppå prisen — kun grovt anslag, gated på dager før avreise (≥30). Verifiser beløp/vilkår hos operatøren før booking.</p>
+  <p style="color:#777;font-size:12px">«Stackbare kuponger» er medlemsrabatter (${escapeHtml(couponNames)}) som <em>antas</em> å kunne legges oppå prisen — kun grovt anslag, gated på dager før avreise. Hver kupong gjelder bare sin egen operatør. Verifiser beløp/vilkår hos operatøren før booking.</p>
 </div>`;
 
   return { subject, text, html };
