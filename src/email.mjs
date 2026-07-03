@@ -11,13 +11,21 @@ import {
 const NOK = (n) =>
   n == null ? '–' : `${Math.round(n).toLocaleString('nb-NO')} kr`;
 
-/** One human line for a deal, e.g. "Hotel Sol ★4 — 2 900 kr/pp, dep 2026-07-10, 7d, 2 voksne [pp 2900 < 3000]". */
+// Friendly operator names for emails; unknown operators get capitalized as-is.
+const OPERATOR_LABEL = { apollo: 'Apollo', ving: 'Ving', tui: 'TUI', amisol: 'Amisol', nazar: 'Nazar' };
+export function operatorLabel(op) {
+  if (!op) return null;
+  return OPERATOR_LABEL[op] ?? op.charAt(0).toUpperCase() + op.slice(1);
+}
+
+/** One human line for a deal, e.g. "Hotel Sol ★4 — 2 900 kr/pp, dep 2026-07-10, 7d, 2 voksne, via Apollo [pp 2900 < 3000]". */
 export function formatDealLine(d) {
   const stars = d.stars ? ` ★${d.stars}` : '';
   const why = d.reasons?.length ? ` [${d.reasons.join(', ')}]` : '';
   const seats = d.availability != null ? `, ${d.availability} seats` : '';
   const party = d.pax ? `, ${PAX_LABEL[d.pax] ?? d.pax}` : '';
-  return `${d.hotel ?? d.accommodationCode ?? 'Unknown'}${stars} — ${NOK(d.currentPricePerPerson)}/pp (total ${NOK(d.currentPrice)}), dep ${d.departureDate}, ${d.durationGroup}d${party}${seats}${why}`;
+  const via = d.operator ? `, via ${operatorLabel(d.operator)}` : '';
+  return `${d.hotel ?? d.accommodationCode ?? 'Unknown'}${stars} — ${NOK(d.currentPricePerPerson)}/pp (total ${NOK(d.currentPrice)}), dep ${d.departureDate}, ${d.durationGroup}d${party}${seats}${via}${why}`;
 }
 
 /**
@@ -46,15 +54,17 @@ export function formatDealEmail(deals) {
 
   const items = deals
     .map((d) => {
-      const line = escapeHtml(formatDealLine(d));
+      const label = operatorLabel(d.operator);
       const link = d.bookingUrl
-        ? ` <a href="${escapeHtml(d.bookingUrl)}">Book on Apollo →</a>`
+        ? ` <a href="${escapeHtml(d.bookingUrl)}">Book${label ? ` on ${escapeHtml(label)}` : ''} →</a>`
         : '';
-      return `<li style="margin:0 0 10px">${line}${link}</li>`;
+      return `<li style="margin:0 0 10px">${escapeHtml(formatDealLine(d))}${link}</li>`;
     })
     .join('');
+  const operators = [...new Set(deals.map((d) => operatorLabel(d.operator)).filter(Boolean))];
+  const viaOperators = operators.length ? ` (${escapeHtml(operators.join(', '))})` : '';
   const html = `<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.5">
-  <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo (Apollo):</p>
+  <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo${viaOperators}:</p>
   <ul style="padding-left:18px">${items}</ul>
   <p style="color:#777;font-size:12px">Rule: under ${PRICE_PER_PERSON_THRESHOLD} kr/pp (4★+ ${PRICE_PP_THRESHOLD_4STAR}, all-inclusive ${PRICE_PP_THRESHOLD_ALL_INCLUSIVE}) or ≥${Math.round(DISCOUNT_THRESHOLD * 100)}% off. Brochure-price discounts can be inflated — eyeball before booking.</p>
 </div>`;

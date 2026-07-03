@@ -311,6 +311,8 @@ export async function openVingSession() {
     throw new Error('[ving] did not capture the page origo-sc query template');
   }
 
+  // Timeout so a stalled request fails into the retry path instead of hanging
+  // the whole sweep until the CI job timeout kills it with nothing persisted.
   const callOnce = (body) =>
     page.evaluate(
       async ({ url, body, marketUnit, callerApp }) => {
@@ -323,6 +325,7 @@ export async function openVingSession() {
             'x-caller-app': callerApp,
           },
           body,
+          signal: AbortSignal.timeout(20000),
         });
         const txt = await r.text();
         if (!r.ok) throw new Error(`origo ${r.status}: ${txt.slice(0, 200)}`);
@@ -349,7 +352,9 @@ export async function runVing({ todayIso } = {}) {
   try {
     return await sweepVing({ todayIso: today, template: session.template, fetchTrips: session.fetchTrips });
   } finally {
-    await session.close();
+    // A close failure (e.g. browser already crashed) must not mask a
+    // successful sweep result.
+    await session.close().catch((err) => console.error('[ving] browser close failed:', err));
   }
 }
 

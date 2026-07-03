@@ -19,7 +19,7 @@ const COLUMNS = [
   { key: 'meal', label: 'Meal', get: (d) => d.meal_plan ?? '' },
   { key: 'pax', label: 'Party', sortable: false },
   { key: 'availability', label: 'Seats', num: true, get: (d) => d.availability },
-  { key: 'seen', label: 'Seen', num: true, get: (d) => (d.last_seen_at ? new Date(d.last_seen_at).getTime() : 0) },
+  { key: 'seen', label: 'Seen', num: true, get: (d) => (d.last_seen_at ? new Date(d.last_seen_at).getTime() : null) },
   { key: 'book', label: '', sortable: false },
 ];
 
@@ -44,7 +44,7 @@ export default function DealsTable({ deals, now }) {
   function clickHeader(col) {
     if (col.sortable === false) return;
     setSort((s) =>
-      s.key === col.key ? { key: col.key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: col.num ? 'asc' : 'asc' },
+      s.key === col.key ? { key: col.key, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { key: col.key, dir: col.num ? 'desc' : 'asc' },
     );
   }
 

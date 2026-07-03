@@ -11,11 +11,12 @@ when a good one appears, and surfaces current deals on a dashboard.
 
 ## Status
 
-Apollo path built end-to-end: **sweep → store → dedup → email**, running on a
-30-min GitHub Actions cron. Stack locked: **Resend** (email) + **Supabase
-Postgres** (`deals` + `seen`) + **GitHub Actions** (runner). 22 passing unit
-tests. Remaining: provision Supabase + secrets, then a Vercel dashboard and the
-Ving/TUI sources — see [`NOTES.md`](./NOTES.md).
+All three source paths built end-to-end and wired into the production run:
+**Apollo + Ving (direct) + Finn.no (TUI/amisol/nazar) → store → dedup →
+email**, on a 15-min GitHub Actions sweep (externally triggered — see
+"Reliable scheduling"). Stack locked: **Resend** (email) + **Supabase
+Postgres** (`deals` + `seen`) + **GitHub Actions** (runner). See
+[`NOTES.md`](./NOTES.md).
 
 ```bash
 npm install
@@ -26,7 +27,7 @@ npm run run              # full pipeline; uses env (falls back to in-memory + co
 
 ## How it runs
 
-`.github/workflows/sweep.yml` runs `node src/run.mjs` every ~30 min. It needs
+`.github/workflows/sweep.yml` runs `node src/run.mjs` every ~15 min. It needs
 these repo secrets (see [`.env.example`](./.env.example)):
 
 | Secret | Purpose |
@@ -36,6 +37,36 @@ these repo secrets (see [`.env.example`](./.env.example)):
 
 Apply `supabase/migrations/0001_init.sql` to your Supabase project first. With
 no secrets set, a run still works locally (in-memory store, emails logged).
+
+### Reliable scheduling
+
+GitHub's `schedule` trigger is **best-effort**: sub-hourly crons are queued and
+frequently dropped, so the 15-min cron actually fires roughly once an hour
+(observed gaps of 1–3 h). The cron is kept only as a fallback; the primary
+trigger should be an external scheduler calling the `workflow_dispatch` API:
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer $GH_PAT" \
+  -H "Accept: application/vnd.github+json" \
+  https://api.github.com/repos/christofferokolgrov/Ferie/actions/workflows/sweep.yml/dispatches \
+  -d '{"ref":"main"}'
+```
+
+Setup (one-time, ~5 min):
+
+1. Create a **fine-grained PAT** scoped to this repo with only
+   **Actions: Read and write** permission (GitHub → Settings → Developer
+   settings → Fine-grained tokens). Set a long expiry.
+2. On [cron-job.org](https://cron-job.org) (free) create a job: every 15 min,
+   `POST` to the URL above with the `Authorization` and `Accept` headers and
+   the `{"ref":"main"}` body. (Any scheduler that can send an authenticated
+   POST works — a Cloudflare Worker cron trigger, UptimeRobot, etc.)
+3. Done — external dispatches fire on time; the GitHub cron stays as a backup,
+   and the workflow's `concurrency` group prevents overlap if both fire.
+
+Note: GitHub also **auto-disables** scheduled workflows after 60 days without
+repo activity; externally-dispatched runs are immune to that too.
 
 ## Target sources & access reality (probed 2026-06-28)
 

@@ -221,6 +221,8 @@ export async function openApolloSession() {
   await page.goto(PAGE_URL, { waitUntil: 'domcontentloaded', timeout: 45000 });
   await page.waitForTimeout(CF_SETTLE_MS); // let CF clearance settle
 
+  // Timeout so a stalled request fails into the retry path instead of hanging
+  // the whole sweep until the CI job timeout kills it with nothing persisted.
   const callOnce = (url, body) =>
     page.evaluate(
       async ({ u, b }) => {
@@ -228,6 +230,7 @@ export async function openApolloSession() {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(b),
+          signal: AbortSignal.timeout(20000),
         });
         const txt = await r.text();
         if (!r.ok) throw new Error(`BFF ${r.status} for ${u}: ${txt.slice(0, 200)}`);
@@ -254,7 +257,9 @@ export async function runApollo({ todayIso } = {}) {
   try {
     return await sweepApollo({ todayIso: today, fetchJson: session.fetchJson });
   } finally {
-    await session.close();
+    // A close failure (e.g. browser already crashed) must not mask a
+    // successful sweep result.
+    await session.close().catch((err) => console.error('[apollo] browser close failed:', err));
   }
 }
 
