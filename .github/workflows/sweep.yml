@@ -1,11 +1,16 @@
 name: Ferie sweep
 
-# Every 15 min (off-minutes to avoid the cron rush; GitHub may delay busy runs).
-# Also runnable on demand.
+# GitHub's `schedule` is best-effort: sub-hourly crons are routinely delayed or
+# dropped entirely (observed: ~1 actual run/hour from a 15-min cron). The
+# schedule below is kept only as a FALLBACK. The primary trigger is an external
+# scheduler (e.g. cron-job.org) POSTing to the workflow_dispatch API every
+# 15 min — see README "Reliable scheduling". repository_dispatch works too.
 on:
   schedule:
     - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
+  repository_dispatch:
+    types: [sweep]
 
 # Don't pile up overlapping sweeps if one runs long.
 concurrency:
@@ -27,8 +32,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")" >> "$GITHUB_OUTPUT"
+
+      # Chromium is a ~150 MB download per run; cache it keyed on the
+      # Playwright version so most runs skip the download entirely.
+      - name: Cache Playwright browser
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ steps.pw.outputs.version }}
+
       - name: Install Chromium for Playwright
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      # System libs live outside the cached path; install them on cache hits.
+      - name: Install Playwright system deps
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Run sweep (all sources)
         run: node src/run.mjs

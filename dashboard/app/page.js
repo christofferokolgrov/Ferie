@@ -12,16 +12,22 @@ async function getDeals() {
   if (!url || !key) {
     return { deals: [], error: 'Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY env vars.' };
   }
-  const supabase = createClient(url, key, { auth: { persistSession: false } });
-  const cutoff = new Date(Date.now() - DEAL_TTL_HOURS * 3600_000).toISOString();
-  const { data, error } = await supabase
-    .from('deals')
-    .select('*')
-    .gt('last_seen_at', cutoff) // hide deals that have aged out (also pruned server-side)
-    .order('current_price_per_person', { ascending: true, nullsFirst: false })
-    .limit(500);
-  if (error) return { deals: [], error: error.message };
-  return { deals: data ?? [], error: null };
+  // force-dynamic means this hits Supabase every request — a transient network
+  // failure must degrade to the friendly error box, not crash the page.
+  try {
+    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const cutoff = new Date(Date.now() - DEAL_TTL_HOURS * 3600_000).toISOString();
+    const { data, error } = await supabase
+      .from('deals')
+      .select('*')
+      .gt('last_seen_at', cutoff) // hide deals that have aged out (also pruned server-side)
+      .order('current_price_per_person', { ascending: true, nullsFirst: false })
+      .limit(500);
+    if (error) return { deals: [], error: error.message };
+    return { deals: data ?? [], error: null };
+  } catch (err) {
+    return { deals: [], error: `Supabase request failed: ${err?.message ?? err}` };
+  }
 }
 
 export default async function Page() {
