@@ -62,6 +62,21 @@ export const PAX_LABEL = Object.fromEntries(
   [...PAX_CONFIGS, ...VING_PAX_CONFIGS].map((p) => [p.key, p.label]),
 );
 
+// Operator display names (email + dashboard). The dashboard keeps its own mirror
+// in format.js (separate package); keep the two in sync.
+export const OPERATOR_LABEL = {
+  apollo: 'Apollo',
+  ving: 'Ving',
+  tui: 'TUI',
+  amisol: 'Amisol',
+  nazar: 'Nazar',
+};
+
+// Deals not re-seen within this window are considered gone: pruned from the
+// store on each sweep and hidden by the dashboard. Sweeps re-find still-listed
+// deals every run, so a deal absent this long has genuinely dropped off.
+export const DEAL_TTL_HOURS = 24;
+
 // ---------------------------------------------------------------------------
 // Finn.no aggregator source (see spikes/finn/README.md). Reaches operators we
 // can't scrape directly — primarily TUI (tui.no hard-blocks datacenter IPs),

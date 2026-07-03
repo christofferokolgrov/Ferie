@@ -337,6 +337,45 @@ Remaining cleanup (deferred): dedupe `openVingSession`≈`openApolloSession`,
 `joinPlace`×3, `num`; Ving fabricated total + single-cheapest-hotel/seenKey churn;
 remove committed `spikes/ving/package-lock.json`.
 
+## Membership coupons (stackable discounts) — BUILT 2026-06-28
+Feature: surface external membership discounts that a buyer can stack ON TOP of a
+restplass price (OBOS, Studentpakken, NAF, Trumf). Informational only — coupons do
+NOT change whether a deal qualifies; they're "you could also stack this" hints.
+
+Research (4 parallel agents; operator/coupon domains 403 anti-bot, so figures are
+from search snippets — re-verify exact amounts/codes at point of use):
+- **OBOS** → Apollo only. 350 kr/pers (up to 500 for Mondo Family/Selected). Code at
+  booking step 6. ≥30 days before departure. (Ving's equivalent is Coop, not OBOS.)
+- **Studentpakken** → Apollo only. 750 kr/booking (flat). Charter only, not Nordics.
+  Code at step 6. ≥30 days before. Free student-gated app (Inform Media, not a bank).
+- **NAF** → TUI only. ~600 kr/pers (campaign figure; standing amount behind login).
+  Code from NAF portal. ≥7 nights, ≥4 000 kr, ≥30 days before. (Apollo's analogues
+  are LO/LOfavør ~350/pers and Pensjonistforbundet — NOT NAF.)
+- **Trumf** → TUI (direct) + Apollo (Netthandel portal); Ving unconfirmed. CASHBACK,
+  not a price cut: 3% if >120 days out, 1% if ≤120 days. Click-through, credited
+  1–2 months after the trip. Caveat: some Netthandel terms exclude pakkereiser.
+
+Simplified model (LOCKED — owner decision): (1) assume coupons STACK on the price
+(ignore the formal "cannot combine" clauses); (2) gate PRIMARILY on lead time
+(days before departure); other constraints (min nights/spend/age/season) not modelled
+in v1. Cashback (Trumf) is folded into the stacked kr total for a rough net estimate.
+
+Tension worth noting: most coupons require ≥30 days lead + no-stacking in their real
+terms, so they rarely apply to genuine sub-30-day restplasser — the lead-time gate
+makes the email/dashboard honest about which still apply on a given day.
+
+Implementation:
+- `src/coupons.mjs` — pure: `COUPONS` catalog, `headcount`, `daysBetween`,
+  `applicableCoupons(deal, todayIso)`, `couponSummary` (stacked total + net/pp).
+  Accepts both camelCase (scraper) and snake_case (DB) deal shapes.
+- `src/email.mjs` — deal line gains a "stackbare kuponger: …  → ~X/pp" hint; mailers
+  pass `today` (impure boundary) so the pure formatter stays clock-free + tested.
+- `dashboard/app/format.js` — `couponSummary` mirrored (separate package; kept in
+  sync like the threshold constants). `DealsTable` renders coupon chips per card.
+- Computed at DISPLAY time, never stored — lead-time eligibility shrinks daily, so a
+  stored value would go stale. No DB migration needed.
+- Tests: `test/coupons.test.mjs` (11 cases). Full suite 43 passing, no network.
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.

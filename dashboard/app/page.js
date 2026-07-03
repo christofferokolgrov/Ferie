@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import RunButton from './RunButton';
 import DealsTable from './DealsTable';
-import { fmtSeen, PP_THRESHOLD, PP_THRESHOLD_4STAR, PP_THRESHOLD_AI } from './format';
+import { fmtSeen, PP_THRESHOLD, PP_THRESHOLD_4STAR, PP_THRESHOLD_AI, DEAL_TTL_HOURS } from './format';
 
 // Always fetch fresh on each request (low traffic; we want current deals).
 export const dynamic = 'force-dynamic';
@@ -16,9 +16,11 @@ async function getDeals() {
   // failure must degrade to the friendly error box, not crash the page.
   try {
     const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const cutoff = new Date(Date.now() - DEAL_TTL_HOURS * 3600_000).toISOString();
     const { data, error } = await supabase
       .from('deals')
       .select('*')
+      .gt('last_seen_at', cutoff) // hide deals that have aged out (also pruned server-side)
       .order('current_price_per_person', { ascending: true, nullsFirst: false })
       .limit(500);
     if (error) return { deals: [], error: error.message };
@@ -38,19 +40,23 @@ export default async function Page() {
 
   return (
     <main>
-      <header>
-        <h1>🏖️ Ferie — restplasser fra Oslo</h1>
-        <div className="sub">
-          {deals.length} qualifying deal{deals.length === 1 ? '' : 's'} (under {PP_THRESHOLD} kr/pp · 4★+ {PP_THRESHOLD_4STAR} · all-incl {PP_THRESHOLD_AI}, or ≥70% off)
-          {lastUpdated ? ` · last sweep ${fmtSeen(lastUpdated, now)}` : ''} · click a column to sort
+      <div className="topbar">
+        <div>
+          <h1>🏖️ Ferie — restplasser fra Oslo</h1>
+          <div className="sub">
+            {deals.length} qualifying deal{deals.length === 1 ? '' : 's'}
+            {lastUpdated ? ` · last sweep ${fmtSeen(lastUpdated, now)}` : ''}
+            <br />
+            under {PP_THRESHOLD} kr/pp · 4★+ {PP_THRESHOLD_4STAR} · all-incl {PP_THRESHOLD_AI} · or ≥70% off
+          </div>
         </div>
         <RunButton />
-      </header>
+      </div>
 
       {error ? (
-        <div className="table-wrap"><div className="error">⚠️ {error}</div></div>
+        <div className="error">⚠️ {error}</div>
       ) : deals.length === 0 ? (
-        <div className="table-wrap"><div className="empty">No deals stored yet. The next sweep will populate this.</div></div>
+        <div className="empty">No deals stored yet. The next sweep will populate this.</div>
       ) : (
         <DealsTable deals={deals} now={now} />
       )}

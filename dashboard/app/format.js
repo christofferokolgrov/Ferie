@@ -17,6 +17,9 @@ export function ppThreshold(d) {
 }
 export const STALE_MS = 2 * 60 * 60 * 1000; // not seen in last sweep window → dim
 export const NEW_MS = 90 * 60 * 1000; // first seen this recently → "NEW"
+// Mirrors DEAL_TTL_HOURS in src/config.mjs — deals not seen this long are pruned
+// server-side; the dashboard also floors its query here as defense-in-depth.
+export const DEAL_TTL_HOURS = 24;
 
 export const PAX_LABEL = {
   '2v': '2 voksne',
@@ -57,4 +60,51 @@ export function fmtSeen(iso, now = Date.now()) {
   const h = Math.round(mins / 60);
   if (h < 24) return `${h}h ago`;
   return `${Math.round(h / 24)}d ago`;
+}
+
+// ---- Stackable membership coupons -----------------------------------------
+// Mirrors src/coupons.mjs (separate package — keep in sync). Simplified model:
+// assume coupons stack on the deal price, gate primarily on days-before-departure.
+// Computed at render time (eligibility shrinks daily), never stored.
+export const COUPONS = [
+  { id: 'obos', label: 'OBOS', operators: ['apollo'], type: 'per_person', amount: 350, minDaysBefore: 30 },
+  { id: 'studentpakken', label: 'Studentpakken', operators: ['apollo'], type: 'per_booking', amount: 750, minDaysBefore: 30 },
+  { id: 'naf', label: 'NAF', operators: ['tui'], type: 'per_person', amount: 600, minDaysBefore: 30 },
+  { id: 'trumf', label: 'Trumf', operators: ['tui'], type: 'cashback_pct', amount: 0.01, minDaysBefore: 0 },
+  { id: 'coop', label: 'Coop', operators: ['ving'], type: 'flag', amount: null, minDaysBefore: 0 },
+];
+
+const PAX_HEADCOUNT = { '2v': 2, '4v': 4, '2v2b': 4, '4v2b': 6 };
+
+function headcount(d) {
+  if (d.pax && PAX_HEADCOUNT[d.pax] != null) return PAX_HEADCOUNT[d.pax];
+  return null;
+}
+
+function leadDays(departure, now) {
+  if (!departure) return null;
+  const dep = Date.parse(`${String(departure).slice(0, 10)}T00:00:00Z`);
+  if (Number.isNaN(dep)) return null;
+  return Math.round((dep - now) / 86400000);
+}
+
+/** Stacked-coupon summary for a deal row. `now` is epoch ms. */
+export function couponSummary(d, now = Date.now()) {
+  const heads = headcount(d);
+  const price = d.current_price == null ? null : Number(d.current_price);
+  const lead = leadDays(d.departure_date, now);
+  const coupons = COUPONS
+    .filter((c) => c.operators.includes(d.operator))
+    .filter((c) => lead == null || lead >= c.minDaysBefore)
+    .map((c) => {
+      let value = null;
+      if (c.type === 'per_person') value = heads != null ? c.amount * heads : null;
+      else if (c.type === 'per_booking') value = c.amount;
+      else if (c.type === 'cashback_pct') value = price != null ? Math.round(price * c.amount) : null;
+      return { id: c.id, label: c.label, value };
+    });
+  const total = coupons.reduce((s, c) => s + (c.value ?? 0), 0);
+  const netPrice = price != null ? Math.max(0, price - total) : null;
+  const netPerPerson = netPrice != null && heads ? Math.round(netPrice / heads) : null;
+  return { coupons, total, netPerPerson };
 }

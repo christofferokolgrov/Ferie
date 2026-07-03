@@ -25,6 +25,13 @@ export class InMemoryStore {
   async markNotified(deals) {
     for (const d of deals) this.seen.add(d.key);
   }
+
+  async deleteStale(beforeIso) {
+    for (const [k, d] of this.deals) {
+      const ts = d.last_seen_at ?? d.lastSeenAt;
+      if (ts && ts < beforeIso) this.deals.delete(k);
+    }
+  }
 }
 
 /** Supabase Postgres store. supabase-js is imported lazily so tests need no dep. */
@@ -67,6 +74,17 @@ export class SupabaseStore {
       .from('seen')
       .upsert(rows, { onConflict: 'key', ignoreDuplicates: true });
     if (error) throw new Error(`seen insert failed: ${error.message}`);
+  }
+
+  // Drop deals not re-seen since `beforeIso` — they've dropped off every source.
+  // The `seen` ledger is intentionally left intact: it's the dedup memory, so a
+  // pruned deal that later reappears under the same key won't re-trigger an email.
+  async deleteStale(beforeIso) {
+    const { error } = await this.client
+      .from('deals')
+      .delete()
+      .lt('last_seen_at', beforeIso);
+    if (error) throw new Error(`deals prune failed: ${error.message}`);
   }
 }
 

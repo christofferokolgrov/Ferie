@@ -2,71 +2,82 @@
 
 import {
   PAX_LABEL,
+  OPERATOR_LABEL,
   PRICE_PER_PERSON_THRESHOLD,
   PRICE_PP_THRESHOLD_4STAR,
   PRICE_PP_THRESHOLD_ALL_INCLUSIVE,
   DISCOUNT_THRESHOLD,
 } from './config.mjs';
+import { COUPONS, couponSummary } from './coupons.mjs';
+import { isoDate } from './dates.mjs';
+
+const operatorName = (op) => OPERATOR_LABEL[op] ?? op ?? 'operatør';
 
 const NOK = (n) =>
   n == null ? '–' : `${Math.round(n).toLocaleString('nb-NO')} kr`;
 
-// Friendly operator names for emails; unknown operators get capitalized as-is.
-const OPERATOR_LABEL = { apollo: 'Apollo', ving: 'Ving', tui: 'TUI', amisol: 'Amisol', nazar: 'Nazar' };
-export function operatorLabel(op) {
-  if (!op) return null;
-  return OPERATOR_LABEL[op] ?? op.charAt(0).toUpperCase() + op.slice(1);
+/**
+ * Stackable membership-coupon hint, e.g.
+ * " | stackbare kuponger: OBOS −700 kr, Trumf −58 kr → ~2 700 kr/pp".
+ * Empty string when none apply for this deal/lead-time.
+ */
+function formatCouponHint(d, today) {
+  const { coupons, netPerPerson } = couponSummary(d, today);
+  if (!coupons.length) return '';
+  const parts = coupons.map((c) => `${c.label}${c.value ? ` −${NOK(c.value)}` : ''}`);
+  const net = netPerPerson != null ? ` → ~${NOK(netPerPerson)}/pp` : '';
+  return ` | stackbare kuponger: ${parts.join(', ')}${net}`;
 }
 
-/** One human line for a deal, e.g. "Hotel Sol ★4 — 2 900 kr/pp, dep 2026-07-10, 7d, 2 voksne, via Apollo [pp 2900 < 3000]". */
-export function formatDealLine(d) {
+/** One human line for a deal, e.g. "Hotel Sol ★4 — 2 900 kr/pp, dep 2026-07-10, 7d, 2 voksne [pp 2900 < 3000]". */
+export function formatDealLine(d, today) {
   const stars = d.stars ? ` ★${d.stars}` : '';
   const why = d.reasons?.length ? ` [${d.reasons.join(', ')}]` : '';
   const seats = d.availability != null ? `, ${d.availability} seats` : '';
   const party = d.pax ? `, ${PAX_LABEL[d.pax] ?? d.pax}` : '';
-  const via = d.operator ? `, via ${operatorLabel(d.operator)}` : '';
-  return `${d.hotel ?? d.accommodationCode ?? 'Unknown'}${stars} — ${NOK(d.currentPricePerPerson)}/pp (total ${NOK(d.currentPrice)}), dep ${d.departureDate}, ${d.durationGroup}d${party}${seats}${via}${why}`;
+  const coupons = formatCouponHint(d, today);
+  return `${d.hotel ?? d.accommodationCode ?? 'Unknown'}${stars} — ${NOK(d.currentPricePerPerson)}/pp (total ${NOK(d.currentPrice)}), dep ${d.departureDate}, ${d.durationGroup}d${party}${seats}${why}${coupons}`;
 }
 
 /**
  * Build the alert email for a batch of newly-seen qualifying deals.
- * Pure: returns { subject, text, html }.
+ * Pure: returns { subject, text, html }. `today` (YYYY-MM-DD) gates which
+ * membership coupons still apply by lead time; omit it to skip coupon hints.
  */
-export function formatDealEmail(deals) {
+export function formatDealEmail(deals, today) {
   const n = deals.length;
-  const cheapest = deals.reduce(
-    (min, d) =>
-      d.currentPricePerPerson != null && d.currentPricePerPerson < min
-        ? d.currentPricePerPerson
-        : min,
-    Infinity,
-  );
+  const prices = deals
+    .map((d) => d.currentPricePerPerson)
+    .filter((p) => p != null && Number.isFinite(Number(p)));
+  const cheapest = prices.length ? Math.min(...prices.map(Number)) : null;
   const subject =
     n === 1
       ? `🏖️ Restplass: ${deals[0].hotel ?? 'deal'} — ${NOK(deals[0].currentPricePerPerson)}/pp`
-      : `🏖️ ${n} restplasser fra OSL — fra ${NOK(cheapest)}/pp`;
+      : cheapest != null
+        ? `🏖️ ${n} restplasser fra OSL — fra ${NOK(cheapest)}/pp`
+        : `🏖️ ${n} restplasser fra OSL`;
 
   const text = [
     `${n} new qualifying deal${n === 1 ? '' : 's'} from Oslo:`,
     '',
-    ...deals.map((d) => `• ${formatDealLine(d)}${d.bookingUrl ? `\n  ${d.bookingUrl}` : ''}`),
+    ...deals.map((d) => `• ${formatDealLine(d, today)}${d.bookingUrl ? `\n  ${d.bookingUrl}` : ''}`),
   ].join('\n');
 
   const items = deals
     .map((d) => {
-      const label = operatorLabel(d.operator);
+      const line = escapeHtml(formatDealLine(d, today));
       const link = d.bookingUrl
-        ? ` <a href="${escapeHtml(d.bookingUrl)}">Book${label ? ` on ${escapeHtml(label)}` : ''} →</a>`
+        ? ` <a href="${escapeHtml(d.bookingUrl)}">Book on ${escapeHtml(operatorName(d.operator))} →</a>`
         : '';
-      return `<li style="margin:0 0 10px">${escapeHtml(formatDealLine(d))}${link}</li>`;
+      return `<li style="margin:0 0 10px">${line}${link}</li>`;
     })
     .join('');
-  const operators = [...new Set(deals.map((d) => operatorLabel(d.operator)).filter(Boolean))];
-  const viaOperators = operators.length ? ` (${escapeHtml(operators.join(', '))})` : '';
+  const couponNames = [...new Set(COUPONS.map((c) => c.label))].join(', ');
   const html = `<div style="font-family:system-ui,Segoe UI,Arial,sans-serif;font-size:15px;line-height:1.5">
-  <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo${viaOperators}:</p>
+  <p><strong>${n} new qualifying deal${n === 1 ? '' : 's'}</strong> from Oslo:</p>
   <ul style="padding-left:18px">${items}</ul>
   <p style="color:#777;font-size:12px">Rule: under ${PRICE_PER_PERSON_THRESHOLD} kr/pp (4★+ ${PRICE_PP_THRESHOLD_4STAR}, all-inclusive ${PRICE_PP_THRESHOLD_ALL_INCLUSIVE}) or ≥${Math.round(DISCOUNT_THRESHOLD * 100)}% off. Brochure-price discounts can be inflated — eyeball before booking.</p>
+  <p style="color:#777;font-size:12px">«Stackbare kuponger» er medlemsrabatter (${escapeHtml(couponNames)}) som <em>antas</em> å kunne legges oppå prisen — kun grovt anslag, gated på dager før avreise. Hver kupong gjelder bare sin egen operatør. Verifiser beløp/vilkår hos operatøren før booking.</p>
 </div>`;
 
   return { subject, text, html };
@@ -88,7 +99,7 @@ export class ResendMailer {
   }
 
   async send(deals) {
-    const { subject, text, html } = formatDealEmail(deals);
+    const { subject, text, html } = formatDealEmail(deals, isoDate(new Date()));
     const res = await this.fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -112,7 +123,7 @@ export class ConsoleMailer {
   }
 
   async send(deals) {
-    const { subject, text } = formatDealEmail(deals);
+    const { subject, text } = formatDealEmail(deals, isoDate(new Date()));
     this.log(`\n[email — not sent, no transport configured]\nSubject: ${subject}\n${text}\n`);
   }
 }
