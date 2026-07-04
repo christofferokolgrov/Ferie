@@ -76,8 +76,8 @@ deferred to later.
 
 ## Poll frequency + sweep scope — LOCKED 2026-06-28
 - **Poll frequency:** every **30 min** (cron concern, lives in the runner).
-- **Horizon:** **~50 days** ahead (was 45; bumped 2026-06-28) — truest last-minute window; further out is
-  mostly non-restplasser noise.
+- **Horizon:** **~35 days** ahead (was 45→50; tightened to 35 on 2026-07-04) — truest last-minute
+  window; further out is mostly non-restplasser noise.
 - **Durations:** `durationGroup` **{7, 14}** (1 week + 2 weeks) — the two
   dominant package lengths.
 - **Destinations:** all OSL destinations (free — the BFF returns them all per

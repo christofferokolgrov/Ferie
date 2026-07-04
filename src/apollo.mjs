@@ -10,7 +10,6 @@ import {
 } from './config.mjs';
 import { sweepWindow } from './dates.mjs';
 import { normalizeProduct, evaluateDeal, seenKey } from './dealrule.mjs';
-import { launchClearedContext, withRetry } from './browser.mjs';
 
 // ---------------------------------------------------------------------------
 // URL builders (pure)
@@ -217,7 +216,20 @@ export async function sweepApollo({ todayIso, fetchJson }) {
  * the cf_clearance cookie automatically.
  */
 export async function openApolloSession() {
-  const { browser, page } = await launchClearedContext({ userAgent: USER_AGENT });
+  const { chromium } = await import('playwright');
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-blink-features=AutomationControlled'],
+  });
+  const ctx = await browser.newContext({
+    userAgent: USER_AGENT,
+    locale: 'nb-NO',
+    timezoneId: 'Europe/Oslo',
+  });
+  await ctx.addInitScript(() =>
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined }),
+  );
+  const page = await ctx.newPage();
   await page.goto(PAGE_URL, { waitUntil: 'domcontentloaded', timeout: 45000 });
   await page.waitForTimeout(CF_SETTLE_MS); // let CF clearance settle
 
@@ -241,11 +253,18 @@ export async function openApolloSession() {
 
   // Retry a single call on transient failures (network blip / momentary CF
   // re-challenge) with backoff, before letting the sweep skip it.
-  const fetchJson = withRetry(callOnce, {
-    attempts: 3,
-    baseMs: 1000, // 1s, 2s
-    sleep: (ms) => page.waitForTimeout(ms),
-  });
+  const fetchJson = async (url, body, attempts = 3) => {
+    let lastErr;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await callOnce(url, body);
+      } catch (err) {
+        lastErr = err;
+        if (i < attempts - 1) await page.waitForTimeout(1000 * 2 ** i); // 1s, 2s
+      }
+    }
+    throw lastErr;
+  };
 
   return { fetchJson, close: () => browser.close() };
 }
