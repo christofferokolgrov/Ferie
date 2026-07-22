@@ -15,8 +15,8 @@ export function addDays(iso, days) {
 
 /**
  * Build the sweep window for a given "today".
- * startDate = today, endDate = today + HORIZON_DAYS.
+ * startDate = today, endDate = the fixed horizon cutoff date.
  */
-export function sweepWindow(todayIso, horizonDays) {
-  return { startDate: todayIso, endDate: addDays(todayIso, horizonDays) };
+export function sweepWindow(todayIso, horizonEndDateIso) {
+  return { startDate: todayIso, endDate: horizonEndDateIso };
 }

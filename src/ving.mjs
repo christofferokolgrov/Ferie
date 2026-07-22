@@ -27,7 +27,7 @@ import {
   VING_TRIP_TYPE,
   VING_PAX_CONFIGS,
   DEPARTURE_AIRPORT,
-  HORIZON_DAYS,
+  HORIZON_END_DATE,
   PRICE_PER_PERSON_THRESHOLD,
   USER_AGENT,
   CF_SETTLE_MS,
@@ -198,7 +198,7 @@ export function buildVingBookingUrl(p) {
  * @returns {Promise<{deals: object[], stats: object}>}
  */
 export async function sweepVing({ todayIso, template, fetchTrips }) {
-  const { endDate } = sweepWindow(todayIso, HORIZON_DAYS);
+  const { endDate } = sweepWindow(todayIso, HORIZON_END_DATE);
 
   // Page through all matching packages (priced at/under our bar, within horizon).
   const nodes = [];

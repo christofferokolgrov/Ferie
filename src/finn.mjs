@@ -20,11 +20,10 @@ import {
   FINN_OPERATORS,
   FINN_TRIP_TYPE,
   DEPARTURE_AIRPORT,
-  HORIZON_DAYS,
+  HORIZON_END_DATE,
   PRICE_PP_THRESHOLD_4STAR,
   USER_AGENT,
 } from './config.mjs';
-import { addDays } from './dates.mjs';
 import { evaluateDeal, seenKey, num, joinDestination } from './dealrule.mjs';
 
 // ---------------------------------------------------------------------------
@@ -104,7 +103,7 @@ export function normalizeFinnOffer(offer) {
  */
 export async function sweepFinn({ todayIso, fetchOffers }) {
   const STOP_BAR = PRICE_PP_THRESHOLD_4STAR; // highest tier a Finn deal can clear
-  const horizonEnd = addDays(todayIso, HORIZON_DAYS);
+  const horizonEnd = HORIZON_END_DATE;
   const deals = [];
   const MAX_PAGES = 40;
   let page = 1;
