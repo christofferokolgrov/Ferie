@@ -1,7 +1,15 @@
+import { promises as nodeFs } from 'node:fs';
+import nodePath from 'node:path';
+
 // Storage port + two implementations.
 //
 // The pipeline depends only on this minimal interface (a "Store"), so it can be
-// driven by an in-memory fake in tests and by Supabase Postgres in production.
+// driven by an in-memory fake in tests and by JSON files on disk in production.
+// There is very little to persist here — a few dozen live deals and an
+// append-only dedup ledger — so the production store is two JSON files that the
+// sweep workflow commits back to the repo. Git is the database: it gives us
+// durability, history and a public read URL for the dashboard, with no external
+// service and no secrets.
 //
 //   getSeenKeys(keys)  -> Promise<Set<string>>   which of these keys we've already notified about
 //   upsertDeals(deals) -> Promise<void>          keep the dashboard's "current deals" fresh
@@ -34,58 +42,98 @@ export class InMemoryStore {
   }
 }
 
-/** Supabase Postgres store. supabase-js is imported lazily so tests need no dep. */
-export class SupabaseStore {
-  constructor(client) {
-    this.client = client;
+/**
+ * JSON-file store — the production store. Keeps two files under `dir`:
+ *
+ *   deals.json  current qualifying deals (the dashboard's data source)
+ *   seen.json   sorted list of deal keys we have already emailed about
+ *
+ * Every mutation rewrites the file it touches, so the pipeline needs no
+ * flush/close step. Writes go through a temp file + rename so an interrupted
+ * run can never leave a half-written file behind. Both files are written
+ * sorted and pretty-printed: the sweep commits them, and stable ordering keeps
+ * those commits to a readable diff instead of a reshuffled blob.
+ */
+export class JsonFileStore {
+  constructor(dir, { deals = [], seen = [] } = {}) {
+    this.dir = dir;
+    this.dealsPath = nodePath.join(dir, 'deals.json');
+    this.seenPath = nodePath.join(dir, 'seen.json');
+    this.deals = new Map(deals.map((d) => [d.key, d]));
+    this.seen = new Set(seen);
   }
 
-  static async create({ url, serviceKey }) {
-    const { createClient } = await import('@supabase/supabase-js');
-    return new SupabaseStore(
-      createClient(url, serviceKey, { auth: { persistSession: false } }),
-    );
+  /** Read the files if they exist; a missing or empty file starts from scratch. */
+  static async create(dir) {
+    const deals = await readJsonArray(nodePath.join(dir, 'deals.json'));
+    const seen = await readJsonArray(nodePath.join(dir, 'seen.json'));
+    return new JsonFileStore(dir, { deals, seen });
   }
 
   async getSeenKeys(keys) {
-    if (keys.length === 0) return new Set();
-    const { data, error } = await this.client
-      .from('seen')
-      .select('key')
-      .in('key', keys);
-    if (error) throw new Error(`seen lookup failed: ${error.message}`);
-    return new Set((data ?? []).map((r) => r.key));
+    return new Set(keys.filter((k) => this.seen.has(k)));
   }
 
   async upsertDeals(deals) {
     if (deals.length === 0) return;
-    const rows = deals.map(toDealRow);
-    const { error } = await this.client
-      .from('deals')
-      .upsert(rows, { onConflict: 'key' });
-    if (error) throw new Error(`deals upsert failed: ${error.message}`);
+    for (const d of deals) {
+      const row = toDealRow(d);
+      this.deals.set(row.key, row);
+    }
+    await this.#writeDeals();
   }
 
   async markNotified(deals) {
     if (deals.length === 0) return;
-    const rows = deals.map((d) => ({ key: d.key, operator: d.operator }));
-    // ignoreDuplicates: a concurrent run may have inserted the same key.
-    const { error } = await this.client
-      .from('seen')
-      .upsert(rows, { onConflict: 'key', ignoreDuplicates: true });
-    if (error) throw new Error(`seen insert failed: ${error.message}`);
+    for (const d of deals) this.seen.add(d.key);
+    await this.#writeSeen();
   }
 
   // Drop deals not re-seen since `beforeIso` — they've dropped off every source.
-  // The `seen` ledger is intentionally left intact: it's the dedup memory, so a
+  // The seen ledger is intentionally left intact: it's the dedup memory, so a
   // pruned deal that later reappears under the same key won't re-trigger an email.
   async deleteStale(beforeIso) {
-    const { error } = await this.client
-      .from('deals')
-      .delete()
-      .lt('last_seen_at', beforeIso);
-    if (error) throw new Error(`deals prune failed: ${error.message}`);
+    let removed = false;
+    for (const [key, d] of this.deals) {
+      if (d.last_seen_at && d.last_seen_at < beforeIso) {
+        this.deals.delete(key);
+        removed = true;
+      }
+    }
+    if (removed) await this.#writeDeals();
   }
+
+  async #writeDeals() {
+    const rows = [...this.deals.values()].sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+    await writeJsonAtomic(this.dealsPath, rows);
+  }
+
+  async #writeSeen() {
+    await writeJsonAtomic(this.seenPath, [...this.seen].sort());
+  }
+}
+
+/** Read a JSON array from `path`; missing file or empty contents -> []. */
+async function readJsonArray(path) {
+  let raw;
+  try {
+    raw = await nodeFs.readFile(path, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return [];
+    throw err;
+  }
+  if (raw.trim() === '') return [];
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) throw new Error(`${path}: expected a JSON array`);
+  return parsed;
+}
+
+/** Write JSON via temp file + rename, so readers never see a partial file. */
+async function writeJsonAtomic(path, value) {
+  await nodeFs.mkdir(nodePath.dirname(path), { recursive: true });
+  const tmp = `${path}.tmp`;
+  await nodeFs.writeFile(tmp, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+  await nodeFs.rename(tmp, path);
 }
 
 /** Map a normalized+evaluated deal to the `deals` table row (snake_case). */
@@ -114,13 +162,22 @@ export function toDealRow(d) {
 }
 
 /**
- * Build a Store from the environment. Returns SupabaseStore when configured,
- * otherwise an InMemoryStore (with a warning) so a local run still works.
+ * Build a Store from the environment. Returns a JsonFileStore over FERIE_DATA_DIR
+ * (default `data/`). Set FERIE_DATA_DIR=:memory: to get a throwaway InMemoryStore
+ * — useful for a local dry run that must not touch the working tree.
  */
 export async function createStoreFromEnv(env = process.env, log = console.error) {
-  const url = env.SUPABASE_URL;
-  const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
-  if (url && serviceKey) return SupabaseStore.create({ url, serviceKey });
-  log('[storage] SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set — using in-memory store (no cross-run dedup).');
-  return new InMemoryStore();
+  const dir = env.FERIE_DATA_DIR ?? DEFAULT_DATA_DIR;
+  if (dir === ':memory:') {
+    log('[storage] FERIE_DATA_DIR=:memory: — using in-memory store (no cross-run dedup).');
+    return new InMemoryStore();
+  }
+  return JsonFileStore.create(dir);
 }
+
+// Repo-relative so a sweep started from any cwd writes the same files the
+// workflow commits.
+export const DEFAULT_DATA_DIR = nodePath.join(
+  nodePath.dirname(nodePath.dirname(new URL(import.meta.url).pathname)),
+  'data',
+);
