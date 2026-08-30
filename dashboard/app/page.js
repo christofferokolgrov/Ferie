@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 import RunButton from './RunButton';
 import DealsTable from './DealsTable';
 import { fmtSeen, PP_THRESHOLD, PP_THRESHOLD_4STAR, PP_THRESHOLD_AI, DEAL_TTL_HOURS } from './format';
@@ -6,27 +5,41 @@ import { fmtSeen, PP_THRESHOLD, PP_THRESHOLD_4STAR, PP_THRESHOLD_AI, DEAL_TTL_HO
 // Always fetch fresh on each request (low traffic; we want current deals).
 export const dynamic = 'force-dynamic';
 
+// The sweep commits data/deals.json to the repo, so the raw file *is* the API.
+// Public repo -> no token needed. Override for a fork or a private mirror.
+const DEALS_URL =
+  process.env.DEALS_URL ??
+  'https://raw.githubusercontent.com/christofferokolgrov/Ferie/main/data/deals.json';
+
 async function getDeals() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    return { deals: [], error: 'Missing SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY env vars.' };
-  }
-  // force-dynamic means this hits Supabase every request — a transient network
+  // force-dynamic means this refetches every request — a transient network
   // failure must degrade to the friendly error box, not crash the page.
   try {
-    const supabase = createClient(url, key, { auth: { persistSession: false } });
+    const res = await fetch(DEALS_URL, { cache: 'no-store' });
+    // A repo without the file yet (404) is "no deals", not an error worth showing.
+    if (res.status === 404) return { deals: [], error: null };
+    if (!res.ok) return { deals: [], error: `Deal data fetch failed: HTTP ${res.status}` };
+
+    const rows = await res.json();
+    if (!Array.isArray(rows)) return { deals: [], error: 'Deal data is not a JSON array.' };
+
+    // Filtering and sorting moved here from the old SQL query: hide deals that
+    // have aged out (the sweep prunes them too) and show cheapest first, with
+    // unpriced deals last.
     const cutoff = new Date(Date.now() - DEAL_TTL_HOURS * 3600_000).toISOString();
-    const { data, error } = await supabase
-      .from('deals')
-      .select('*')
-      .gt('last_seen_at', cutoff) // hide deals that have aged out (also pruned server-side)
-      .order('current_price_per_person', { ascending: true, nullsFirst: false })
-      .limit(500);
-    if (error) return { deals: [], error: error.message };
-    return { deals: data ?? [], error: null };
+    const deals = rows
+      .filter((d) => d.last_seen_at && d.last_seen_at > cutoff)
+      .sort((a, b) => {
+        const x = a.current_price_per_person;
+        const y = b.current_price_per_person;
+        if (x == null) return y == null ? 0 : 1;
+        if (y == null) return -1;
+        return x - y;
+      })
+      .slice(0, 500);
+    return { deals, error: null };
   } catch (err) {
-    return { deals: [], error: `Supabase request failed: ${err?.message ?? err}` };
+    return { deals: [], error: `Deal data request failed: ${err?.message ?? err}` };
   }
 }
 

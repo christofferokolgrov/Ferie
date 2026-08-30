@@ -14,10 +14,16 @@ on:
   repository_dispatch:
     types: [sweep]
 
-# Don't pile up overlapping sweeps if one runs long.
+# Don't pile up overlapping sweeps if one runs long. Also the write lock for
+# data/: the store commits back to this branch, so two sweeps must never run at
+# once.
 concurrency:
   group: ferie-sweep
   cancel-in-progress: false
+
+# The sweep commits data/deals.json + data/seen.json back to the repo.
+permissions:
+  contents: write
 
 jobs:
   sweep:
@@ -59,8 +65,22 @@ jobs:
       - name: Run sweep (all sources)
         run: node src/run.mjs
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+
+      # data/ is the store. Commit it so the next run remembers what we've
+      # already emailed about, and so the dashboard can read it. `git pull
+      # --rebase` guards against the branch having moved while the sweep ran.
+      - name: Commit updated deal data
+        run: |
+          if git diff --quiet -- data/; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git commit -m "data: sweep $(date -u +%Y-%m-%dT%H:%MZ)"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

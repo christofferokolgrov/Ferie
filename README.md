@@ -14,31 +14,53 @@ when a good one appears, and surfaces current deals on a dashboard.
 All three source paths built end-to-end and wired into the production run:
 **Apollo + Ving (direct) + Finn.no (TUI/amisol/nazar) → store → dedup →
 email**, on a daily GitHub Actions sweep at 12:00 Norwegian time (see
-"Reliable scheduling"). Stack locked: **Resend** (email) + **Supabase
-Postgres** (`deals` + `seen`) + **GitHub Actions** (runner). See
-[`NOTES.md`](./NOTES.md).
+"Reliable scheduling"). Stack locked: **Resend** (email) + **JSON files in
+this repo** (`data/deals.json` + `data/seen.json`) + **GitHub Actions**
+(runner). See [`NOTES.md`](./NOTES.md).
 
 ```bash
 npm install
 npm test                 # pure logic, no network
 npm run sweep:apollo     # live sweep only (needs: npx playwright install chromium)
-npm run run              # full pipeline; uses env (falls back to in-memory + console)
+npm run run              # full pipeline; writes data/, emails to console without Resend
+FERIE_DATA_DIR=:memory: npm run run   # dry run: leaves data/ untouched
 ```
 
 ## How it runs
 
 `.github/workflows/sweep.yml` runs `node src/run.mjs` once a day, at 12:00
 Norwegian time (`0 10 * * *` — GitHub crons are UTC, so this is 12:00 CEST in
-summer and 11:00 CET in winter). It needs these repo secrets
+summer and 11:00 CET in winter). It needs one set of repo secrets
 (see [`.env.example`](./.env.example)):
 
 | Secret | Purpose |
 |--------|---------|
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` | store deals + dedup set |
-| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TO`  | send deal alerts |
+| `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_TO` | send deal alerts |
 
-Apply `supabase/migrations/0001_init.sql` to your Supabase project first. With
-no secrets set, a run still works locally (in-memory store, emails logged).
+Without them a run still works — emails are printed to the log instead of sent.
+
+### Where the data lives
+
+There is no database. The two things worth keeping are small enough to be files,
+and the sweep commits them back to this repo at the end of every run:
+
+| File | Contents |
+|------|----------|
+| `data/deals.json` | the currently qualifying deals — the dashboard's data source |
+| `data/seen.json`  | sorted deal keys we have already emailed about (dedup memory) |
+
+That makes git the database: durable, versioned, and readable over plain HTTPS.
+The dashboard fetches `data/deals.json` straight from `raw.githubusercontent.com`,
+so it needs no credentials either. Both files are written sorted, so a sweep's
+commit is a readable diff rather than a reshuffled blob.
+
+Two consequences worth knowing:
+
+- **The sweep pushes to the repo.** It needs `contents: write` (already set in the
+  workflow) and produces one commit per run — fine at one run a day, noisy if the
+  cadence ever goes back to every 15 minutes.
+- **One writer at a time.** The workflow's `concurrency` group is the write lock;
+  two overlapping sweeps would race on the same files.
 
 ### Reliable scheduling
 
@@ -90,7 +112,7 @@ less-flagged IP (container runner), not an edge/serverless function.
 ## Leaning-toward stack
 
 - **Scraper:** Playwright in a container runner (Render cron ~$1/mo or existing Lightsail box)
-- **Database + scheduler:** Supabase (deals table + seen-set for dedup; Supabase Cron triggers)
+- **Database + scheduler:** ~~Supabase~~ → superseded: JSON files committed by the sweep (see "Where the data lives")
 - **Dashboard:** Vercel (read-only frontend)
 - **Email:** Resend (free tier) or Microsoft 365 SMTP
 - **Source / CI:** GitHub

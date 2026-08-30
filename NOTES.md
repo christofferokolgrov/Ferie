@@ -405,6 +405,40 @@ Tests: new `test/dates.test.mjs`; lead-time cases added to the Apollo, Ving and
 Finn sweeps. The Finn horizon fixture moved 2026-12-01 → 2027-02-01 (the old
 date is inside the new window). Full suite 78 passing, no network.
 
+## Dropped Supabase for JSON files in the repo — 2026-08-30
+Owner removed Supabase access and asked whether we need a database at all for
+this much data. We don't: `deals` holds ~5-50 rows (pruned at 72 h) and `seen`
+grows a few keys a day. Under 1 MB a year.
+
+- **New store:** `JsonFileStore` in `src/storage.mjs`, over `data/deals.json` +
+  `data/seen.json`. Same Store port, so `pipeline.mjs` is untouched. Every
+  mutation rewrites its file (no flush step to forget), via temp-file + rename
+  so an interrupted run can't leave a half-written file. Both files written
+  sorted → sweep commits are readable diffs.
+- **Persistence is git.** The workflow gained `permissions: contents: write` and
+  a step that commits `data/` and pushes (with `git pull --rebase` in case the
+  branch moved). The `concurrency` group doubles as the write lock.
+- **Dashboard** fetches `data/deals.json` from `raw.githubusercontent.com` at
+  request time. The repo is public, so this needs no token — the old
+  SUPABASE_* env vars are gone from Vercel too. Filtering (TTL cutoff) and
+  sorting (cheapest first, unpriced last) moved from SQL into `page.js`.
+  `DEALS_URL` overrides the source for a fork or private mirror.
+- **Removed:** `@supabase/supabase-js` from both packages, `supabase/migrations/`
+  (recoverable from git history if we ever go back), and the SUPABASE_* secrets.
+
+Note the repo is **public** (NOTES previously said private) — so the deal data
+is now public too. It's hotel names, prices and dates, nothing sensitive, but
+it's a deliberate consequence of putting the store in the repo.
+
+Cost of the switch: the old `seen` ledger stayed in Supabase and could not be
+exported (access was already removed), so `data/seen.json` starts empty. The
+first sweep after this lands will treat every current deal as new and email
+them all once. It settles from the second run on.
+
+Tests: `test/storage.test.mjs` (7 cases — round-trip, missing/empty/malformed
+files, prune-keeps-ledger, sorted output, no temp file left, env selection).
+Full suite 85 passing. Dashboard build clean.
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.

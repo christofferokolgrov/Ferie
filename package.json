@@ -12,7 +12,6 @@
     "run": "node src/run.mjs"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.0",
     "playwright": "^1.44.0"
   }
 }
