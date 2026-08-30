@@ -377,6 +377,34 @@ Implementation:
   stored value would go stale. No DB migration needed.
 - Tests: `test/coupons.test.mjs` (11 cases). Full suite 43 passing, no network.
 
+## Cadence + window retune — 2026-08-30
+Owner asked for one sweep a day at 12:00, a horizon out to 2027-01-01, and a
+minimum of 3 days before departure.
+
+- **Cadence:** cron `0 10 * * *` (12:00 CEST / 11:00 CET — GitHub cron is UTC
+  with no DST handling), replacing `7,22,37,52 * * * *`. The 15-min external
+  workflow_dispatch scheduler is no longer needed; a daily cron is punctual
+  enough on its own. `POLL_INTERVAL_MIN` 15 → 1440.
+- **Horizon:** `HORIZON_END_DATE` 2026-08-12 → **2027-01-01** (the old cutoff
+  had passed, so the window was empty).
+- **Lead time:** new `MIN_LEAD_DAYS = 3`. `sweepWindow` now takes it and opens
+  the window at today+3 instead of today. Apollo gets it via `startDate` on the
+  calendar call; Ving via a new `dateFrom` arg on `lmsTrips` (documented in the
+  spike, previously unused) plus a client-side re-check, since the arg injection
+  is best-effort against a captured page template; Finn filters client-side (no
+  date facet on its API). Finn's `outsideHorizon` stat renamed `outsideWindow`
+  — it now counts both ends of the window, matching Ving's field.
+- **Knock-on windows** — both were sized for a 15-min cadence and would have
+  broken under daily runs:
+  - `DEAL_TTL_HOURS` 24 → **72**. Pruning runs per sweep, so at 24 h a single
+    missed or failed daily run would empty the dashboard.
+  - Dashboard `STALE_MS` 2 h → 26 h, `NEW_MS` 90 min → 24 h; otherwise every
+    deal reads as stale between sweeps and "NEW" is never visible.
+
+Tests: new `test/dates.test.mjs`; lead-time cases added to the Apollo, Ving and
+Finn sweeps. The Finn horizon fixture moved 2026-12-01 → 2027-02-01 (the old
+date is inside the new window). Full suite 78 passing, no network.
+
 ## ===== RESUME HERE (next session) =====
 ### Decisions locked so far
 1. Scraping only; no API exists. Personal use.

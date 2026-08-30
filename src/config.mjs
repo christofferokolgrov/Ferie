@@ -1,7 +1,7 @@
 // Locked sweep parameters (shared across sources).
 // Decisions made in the design grilling (see NOTES.md):
-//   - Poll every 15 min (cron concern; documented here for reference)
-//   - Horizon: fixed cutoff at 2026-08-12 (shrinks as that date approaches)
+//   - Poll once a day at 12:00 Norwegian time (cron concern; noted here for reference)
+//   - Horizon: departures from today+3 days out to a fixed cutoff at 2027-01-01
 //   - Durations: 1 week (7) and 2 weeks (14)
 //   - Deal rule: CurrentPricePerPerson < 3500 OR discount >= 70%
 
@@ -17,7 +17,13 @@ export const DURATION_GROUPS = [7, 14];
 // Fixed cutoff date each sweep looks out to (YYYY-MM-DD). Unlike a rolling
 // days-ahead horizon, this stays put — the window shrinks day by day as
 // "today" approaches it.
-export const HORIZON_END_DATE = '2026-08-12';
+export const HORIZON_END_DATE = '2027-01-01';
+
+// Minimum lead time: departures sooner than this many days from "today" are
+// out of scope (too close to actually book and travel). The sweep window
+// therefore starts at today+MIN_LEAD_DAYS, not today. Note the window closes
+// for good once today+MIN_LEAD_DAYS passes HORIZON_END_DATE.
+export const MIN_LEAD_DAYS = 3;
 
 // Party configurations to sweep. paxAges is Apollo's comma-separated age list
 // (18 = adult). Each party is searched independently (its per-person price and
@@ -75,9 +81,11 @@ export const OPERATOR_LABEL = {
 };
 
 // Deals not re-seen within this window are considered gone: pruned from the
-// store on each sweep and hidden by the dashboard. Sweeps re-find still-listed
-// deals every run, so a deal absent this long has genuinely dropped off.
-export const DEAL_TTL_HOURS = 24;
+// store on each sweep and hidden by the dashboard. Sweeps run once a day, so
+// this must span several runs — at 24 h a single missed or failed sweep would
+// wipe the dashboard. 72 h tolerates two consecutive misses before a still-
+// listed deal is dropped.
+export const DEAL_TTL_HOURS = 72;
 
 // ---------------------------------------------------------------------------
 // Finn.no aggregator source (see spikes/finn/README.md). Reaches operators we
@@ -96,7 +104,8 @@ export const FINN_OPERATORS = ['tui', 'amisol', 'nazar'];
 export const FINN_TRIP_TYPE = 'spesifisert';
 
 // Cron cadence — informational; the schedule lives in the runner, not here.
-export const POLL_INTERVAL_MIN = 15;
+// One sweep a day, at 12:00 Norwegian time (see .github/workflows/sweep.yml).
+export const POLL_INTERVAL_MIN = 1440;
 
 // Deal rule thresholds (NOK). The per-person bar is tiered: a pricier package
 // still counts if it's high-star or all-inclusive. The highest applicable tier

@@ -6,6 +6,7 @@ import {
   DEPARTURE_AIRPORT,
   DURATION_GROUPS,
   HORIZON_END_DATE,
+  MIN_LEAD_DAYS,
   PAX_CONFIGS,
 } from './config.mjs';
 import { sweepWindow } from './dates.mjs';
@@ -112,7 +113,7 @@ export function extractProducts(productsJson) {
  *   deals: qualifying deals (normalized product + evaluation + seenKey)
  */
 export async function sweepApollo({ todayIso, fetchJson }) {
-  const window = sweepWindow(todayIso, HORIZON_END_DATE);
+  const window = sweepWindow(todayIso, HORIZON_END_DATE, MIN_LEAD_DAYS);
   const body = spanBody(window);
   const deals = [];
   let productCalls = 0;

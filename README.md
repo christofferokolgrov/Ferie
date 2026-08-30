@@ -13,7 +13,7 @@ when a good one appears, and surfaces current deals on a dashboard.
 
 All three source paths built end-to-end and wired into the production run:
 **Apollo + Ving (direct) + Finn.no (TUI/amisol/nazar) → store → dedup →
-email**, on a 15-min GitHub Actions sweep (externally triggered — see
+email**, on a daily GitHub Actions sweep at 12:00 Norwegian time (see
 "Reliable scheduling"). Stack locked: **Resend** (email) + **Supabase
 Postgres** (`deals` + `seen`) + **GitHub Actions** (runner). See
 [`NOTES.md`](./NOTES.md).
@@ -27,8 +27,10 @@ npm run run              # full pipeline; uses env (falls back to in-memory + co
 
 ## How it runs
 
-`.github/workflows/sweep.yml` runs `node src/run.mjs` every ~15 min. It needs
-these repo secrets (see [`.env.example`](./.env.example)):
+`.github/workflows/sweep.yml` runs `node src/run.mjs` once a day, at 12:00
+Norwegian time (`0 10 * * *` — GitHub crons are UTC, so this is 12:00 CEST in
+summer and 11:00 CET in winter). It needs these repo secrets
+(see [`.env.example`](./.env.example)):
 
 | Secret | Purpose |
 |--------|---------|
@@ -40,10 +42,12 @@ no secrets set, a run still works locally (in-memory store, emails logged).
 
 ### Reliable scheduling
 
-GitHub's `schedule` trigger is **best-effort**: sub-hourly crons are queued and
-frequently dropped, so the 15-min cron actually fires roughly once an hour
-(observed gaps of 1–3 h). The cron is kept only as a fallback; the primary
-trigger should be an external scheduler calling the `workflow_dispatch` API:
+GitHub's `schedule` trigger is **best-effort**: runs are queued and can be
+delayed or dropped under load. A once-daily cron is usually punctual to within
+minutes — far more reliable than the sub-hourly cron this repo used to run — so
+the cron alone is fine if a sweep landing at 12:1x instead of 12:00 doesn't
+matter. If you want the sweep to fire at exactly 12:00 every day, drive it from
+an external scheduler calling the `workflow_dispatch` API instead:
 
 ```bash
 curl -X POST \
@@ -58,10 +62,12 @@ Setup (one-time, ~5 min):
 1. Create a **fine-grained PAT** scoped to this repo with only
    **Actions: Read and write** permission (GitHub → Settings → Developer
    settings → Fine-grained tokens). Set a long expiry.
-2. On [cron-job.org](https://cron-job.org) (free) create a job: every 15 min,
-   `POST` to the URL above with the `Authorization` and `Accept` headers and
-   the `{"ref":"main"}` body. (Any scheduler that can send an authenticated
-   POST works — a Cloudflare Worker cron trigger, UptimeRobot, etc.)
+2. On [cron-job.org](https://cron-job.org) (free) create a job: daily at 12:00
+   Europe/Oslo, `POST` to the URL above with the `Authorization` and `Accept`
+   headers and the `{"ref":"main"}` body. An external scheduler follows local
+   time, so it also keeps 12:00 across the DST switch. (Any scheduler that can
+   send an authenticated POST works — a Cloudflare Worker cron trigger,
+   UptimeRobot, etc.)
 3. Done — external dispatches fire on time; the GitHub cron stays as a backup,
    and the workflow's `concurrency` group prevents overlap if both fire.
 

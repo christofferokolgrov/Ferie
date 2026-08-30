@@ -94,13 +94,13 @@ function pagedFetch(pages) {
 const mk = (over) => ({ ...TUI_OFFER, ...over });
 
 test('sweepFinn applies tiered bars (4★ up to 4500), gates horizon, stops at top tier', async () => {
-  // todayIso 2026-06-28, horizon 50d → window ~ up to 2026-08-17.
+  // todayIso 2026-06-28, fixed horizon cutoff HORIZON_END_DATE (2027-01-01).
   const page1 = {
     currentPage: 1,
     totalPages: 2,
     offers: [
       mk({ price: '2990', rating: '2.5', hotelName: 'Cheap Inn', outboundDepartureTime: '2026-07-10T00:00:00', supplier: 'tui' }),    // <3500 base → qualifies
-      mk({ price: '3200', rating: '2.0', hotelName: 'Far Future', outboundDepartureTime: '2026-12-01T00:00:00', supplier: 'amisol' }),// under base but outside horizon → skip
+      mk({ price: '3200', rating: '2.0', hotelName: 'Far Future', outboundDepartureTime: '2027-02-01T00:00:00', supplier: 'amisol' }),// under base but outside horizon → skip
       mk({ price: '4200', rating: '4.5', hotelName: 'Posh 4star', outboundDepartureTime: '2026-08-01T00:00:00', supplier: 'tui' }),   // 4★ tier (4500) → qualifies
       mk({ price: '4300', rating: '3.0', hotelName: 'Midrange', outboundDepartureTime: '2026-07-15T00:00:00' }),                      // 3★ → base bar → NOT qualifying, but < stop bar → keep scanning
       mk({ price: '4600', rating: '5.0', hotelName: 'Over Bar', outboundDepartureTime: '2026-07-15T00:00:00' }),                      // >= 4500 stop bar → STOP
@@ -115,8 +115,26 @@ test('sweepFinn applies tiered bars (4★ up to 4500), gates horizon, stops at t
   const posh = deals.find((d) => d.hotel === 'Posh 4star');
   assert.match(posh.reasons.join(' '), /4★|4500/); // qualified via the 4★ tier
   assert.ok(deals.every((d) => d.key.includes('|') && d.bookingUrl && d.reasons.length));
-  assert.equal(stats.outsideHorizon, 1);
+  assert.equal(stats.outsideWindow, 1);
   assert.equal(stats.minPricePerPerson, 2990);
+});
+
+test('sweepFinn skips departures inside the MIN_LEAD_DAYS floor', async () => {
+  // todayIso 2026-06-28 → the window opens 2026-07-01 (today + 3).
+  const page = {
+    currentPage: 1,
+    totalPages: 1,
+    offers: [
+      mk({ price: '1990', hotelName: 'Tomorrow', outboundDepartureTime: '2026-06-29T00:00:00', supplier: 'tui' }), // 1 day out → too soon
+      mk({ price: '2090', hotelName: 'Day Three', outboundDepartureTime: '2026-06-30T00:00:00', supplier: 'tui' }), // 2 days out → too soon
+      mk({ price: '2190', hotelName: 'Day Four', outboundDepartureTime: '2026-07-01T00:00:00', supplier: 'tui' }),  // exactly 3 days out → kept
+    ],
+  };
+
+  const { deals, stats } = await sweepFinn({ todayIso: '2026-06-28', fetchOffers: pagedFetch([page]) });
+
+  assert.deepEqual(deals.map((d) => d.hotel), ['Day Four']);
+  assert.equal(stats.outsideWindow, 2);
 });
 
 test('sweepFinn skips offers from non-Finn operators (never apollo/ving) and missing supplier', async () => {

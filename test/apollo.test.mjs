@@ -8,6 +8,7 @@ import {
   extractProducts,
   sweepApollo,
 } from '../src/apollo.mjs';
+import { HORIZON_END_DATE } from '../src/config.mjs';
 
 test('buildCheapestUrl carries the locked OSL params', () => {
   const u = buildCheapestUrl({ durationGroup: 7, startDate: '2026-06-28', endDate: '2026-08-12' });
@@ -84,6 +85,12 @@ test('sweepApollo: two-stage flow across parties, only real departure dates hit 
   };
 
   const { deals, stats } = await sweepApollo({ todayIso: '2026-06-28', fetchJson });
+
+  // The calendar call opens the window at today + MIN_LEAD_DAYS (3), not today,
+  // and closes it at the fixed horizon.
+  const cheapestUrls = calls.filter((u) => u.includes('/cheapest'));
+  assert.ok(cheapestUrls.every((u) => u.includes('startDate=2026-07-01')));
+  assert.ok(cheapestUrls.every((u) => u.includes(`endDate=${HORIZON_END_DATE}`)));
 
   // 3 parties × 2 durations: 6 cheapest calls + 6 products calls.
   assert.deepEqual(stats.paxConfigs, ['2v', '2v2b', '4v2b']);

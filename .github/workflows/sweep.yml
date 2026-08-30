@@ -1,13 +1,15 @@
 name: Ferie sweep
 
-# GitHub's `schedule` is best-effort: sub-hourly crons are routinely delayed or
-# dropped entirely (observed: ~1 actual run/hour from a 15-min cron). The
-# schedule below is kept only as a FALLBACK. The primary trigger is an external
-# scheduler (e.g. cron-job.org) POSTing to the workflow_dispatch API every
-# 15 min — see README "Reliable scheduling". repository_dispatch works too.
+# One sweep per day, at 12:00 Norwegian time. GitHub crons are UTC and have no
+# DST handling, so 10:00 UTC = 12:00 CEST (summer) / 11:00 CET (winter).
+# GitHub's `schedule` is also best-effort — a daily cron is usually punctual to
+# within minutes, but can be delayed or dropped under load, so the schedule is
+# kept as a FALLBACK. For an exact 12:00 every day, point an external scheduler
+# (e.g. cron-job.org) at the workflow_dispatch API once a day — see README
+# "Reliable scheduling". repository_dispatch works too.
 on:
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    - cron: '0 10 * * *'
   workflow_dispatch:
   repository_dispatch:
     types: [sweep]

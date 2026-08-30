@@ -1,6 +1,6 @@
 // Production entrypoint — wires the sources, store and mailer from env, then runs
 // one sweep→dedup→email pass across ALL enabled sources. This is what the GitHub
-// Actions cron invokes every 15 minutes (`node src/run.mjs`).
+// Actions cron invokes once a day at 12:00 Norwegian time (`node src/run.mjs`).
 
 import { sweepAllSources } from './sources.mjs';
 import { createStoreFromEnv } from './storage.mjs';

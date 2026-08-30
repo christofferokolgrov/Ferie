@@ -21,10 +21,12 @@ import {
   FINN_TRIP_TYPE,
   DEPARTURE_AIRPORT,
   HORIZON_END_DATE,
+  MIN_LEAD_DAYS,
   PRICE_PP_THRESHOLD_4STAR,
   USER_AGENT,
 } from './config.mjs';
 import { evaluateDeal, seenKey, num, joinDestination } from './dealrule.mjs';
+import { sweepWindow } from './dates.mjs';
 
 // ---------------------------------------------------------------------------
 // URL builder (pure). Params discovered in the spike: fra=airport, med=operator
@@ -103,13 +105,15 @@ export function normalizeFinnOffer(offer) {
  */
 export async function sweepFinn({ todayIso, fetchOffers }) {
   const STOP_BAR = PRICE_PP_THRESHOLD_4STAR; // highest tier a Finn deal can clear
-  const horizonEnd = HORIZON_END_DATE;
+  // Finn has no date filter on the API side, so the window is applied here.
+  const { startDate: earliestDeparture, endDate: horizonEnd } =
+    sweepWindow(todayIso, HORIZON_END_DATE, MIN_LEAD_DAYS);
   const deals = [];
   const MAX_PAGES = 40;
   let page = 1;
   let offersScanned = 0;
   let underBar = 0;
-  let outsideHorizon = 0;
+  let outsideWindow = 0;
   let skippedOther = 0;
   let skippedNoDuration = 0;
   let minPricePerPerson = null;
@@ -151,9 +155,10 @@ export async function sweepFinn({ todayIso, fetchOffers }) {
         skippedNoDuration += 1;
         continue;
       }
-      // Keep to the last-minute horizon (same window as Apollo/Ving).
-      if (!p.departureDate || p.departureDate < todayIso || p.departureDate > horizonEnd) {
-        outsideHorizon += 1;
+      // Keep to the sweep window (same as Apollo/Ving): at least MIN_LEAD_DAYS
+      // out, and no later than the horizon cutoff.
+      if (!p.departureDate || p.departureDate < earliestDeparture || p.departureDate > horizonEnd) {
+        outsideWindow += 1;
         continue;
       }
       const evalResult = evaluateDeal(p);
@@ -176,7 +181,7 @@ export async function sweepFinn({ todayIso, fetchOffers }) {
       failedPages,
       offersScanned,
       underBar,
-      outsideHorizon,
+      outsideWindow,
       skippedOther,
       skippedNoDuration,
       minPricePerPerson,
