@@ -15,11 +15,14 @@ export function ppThreshold(d) {
   if (isAllInclusive(d.meal_plan)) t = Math.max(t, PP_THRESHOLD_AI);
   return t;
 }
-export const STALE_MS = 2 * 60 * 60 * 1000; // not seen in last sweep window → dim
-export const NEW_MS = 90 * 60 * 1000; // first seen this recently → "NEW"
+// The sweep runs once a day (12:00 Norwegian time), so these windows are sized
+// in days, not minutes: a deal missed by the last daily sweep is dimmed, and the
+// deals found by the most recent sweep stay flagged NEW until the next one.
+export const STALE_MS = 26 * 60 * 60 * 1000; // not seen in last sweep window → dim
+export const NEW_MS = 24 * 60 * 60 * 1000; // first seen this recently → "NEW"
 // Mirrors DEAL_TTL_HOURS in src/config.mjs — deals not seen this long are pruned
 // server-side; the dashboard also floors its query here as defense-in-depth.
-export const DEAL_TTL_HOURS = 24;
+export const DEAL_TTL_HOURS = 72;
 
 export const PAX_LABEL = {
   '2v': '2 voksne',

@@ -94,13 +94,13 @@ function pagedFetch(pages) {
 const mk = (over) => ({ ...TUI_OFFER, ...over });
 
 test('sweepFinn applies tiered bars (4★ up to 4500), gates horizon, stops at top tier', async () => {
-  // todayIso 2026-06-28, horizon 50d → window ~ up to 2026-08-17.
+  // todayIso 2026-06-28, fixed horizon cutoff HORIZON_END_DATE (2027-01-01).
   const page1 = {
     currentPage: 1,
     totalPages: 2,
     offers: [
       mk({ price: '2990', rating: '2.5', hotelName: 'Cheap Inn', outboundDepartureTime: '2026-07-10T00:00:00', supplier: 'tui' }),    // <3500 base → qualifies
-      mk({ price: '3200', rating: '2.0', hotelName: 'Far Future', outboundDepartureTime: '2026-12-01T00:00:00', supplier: 'amisol' }),// under base but outside horizon → skip
+      mk({ price: '3200', rating: '2.0', hotelName: 'Far Future', outboundDepartureTime: '2027-02-01T00:00:00', supplier: 'amisol' }),// under base but outside horizon → skip
       mk({ price: '4200', rating: '4.5', hotelName: 'Posh 4star', outboundDepartureTime: '2026-08-01T00:00:00', supplier: 'tui' }),   // 4★ tier (4500) → qualifies
       mk({ price: '4300', rating: '3.0', hotelName: 'Midrange', outboundDepartureTime: '2026-07-15T00:00:00' }),                      // 3★ → base bar → NOT qualifying, but < stop bar → keep scanning
       mk({ price: '4600', rating: '5.0', hotelName: 'Over Bar', outboundDepartureTime: '2026-07-15T00:00:00' }),                      // >= 4500 stop bar → STOP

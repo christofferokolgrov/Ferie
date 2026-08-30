@@ -1,7 +1,7 @@
 // Locked sweep parameters (shared across sources).
 // Decisions made in the design grilling (see NOTES.md):
-//   - Poll every 15 min (cron concern; documented here for reference)
-//   - Horizon: fixed cutoff at 2026-08-12 (shrinks as that date approaches)
+//   - Poll once a day at 12:00 Norwegian time (cron concern; noted here for reference)
+//   - Horizon: fixed cutoff at 2027-01-01 (shrinks as that date approaches)
 //   - Durations: 1 week (7) and 2 weeks (14)
 //   - Deal rule: CurrentPricePerPerson < 3500 OR discount >= 70%
 
@@ -17,7 +17,7 @@ export const DURATION_GROUPS = [7, 14];
 // Fixed cutoff date each sweep looks out to (YYYY-MM-DD). Unlike a rolling
 // days-ahead horizon, this stays put — the window shrinks day by day as
 // "today" approaches it.
-export const HORIZON_END_DATE = '2026-08-12';
+export const HORIZON_END_DATE = '2027-01-01';
 
 // Party configurations to sweep. paxAges is Apollo's comma-separated age list
 // (18 = adult). Each party is searched independently (its per-person price and
@@ -75,9 +75,11 @@ export const OPERATOR_LABEL = {
 };
 
 // Deals not re-seen within this window are considered gone: pruned from the
-// store on each sweep and hidden by the dashboard. Sweeps re-find still-listed
-// deals every run, so a deal absent this long has genuinely dropped off.
-export const DEAL_TTL_HOURS = 24;
+// store on each sweep and hidden by the dashboard. Sweeps run once a day, so
+// this must span several runs — at 24 h a single missed or failed sweep would
+// wipe the dashboard. 72 h tolerates two consecutive misses before a still-
+// listed deal is dropped.
+export const DEAL_TTL_HOURS = 72;
 
 // ---------------------------------------------------------------------------
 // Finn.no aggregator source (see spikes/finn/README.md). Reaches operators we
