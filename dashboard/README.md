@@ -1,22 +1,23 @@
 # Ferie dashboard
 
-Read-only Next.js view of the Supabase `deals` table — current qualifying
-restplasser, cheapest per-person first, with a direct "Book →" link per deal.
+Read-only Next.js view of `data/deals.json` — current qualifying restplasser,
+cheapest per-person first, with a direct "Book →" link per deal.
 
-Data is fetched **server-side** with the Supabase `service_role` key, so the key
-never reaches the browser and the `deals` table stays locked (RLS, no public
-read policy needed).
+There is no database. The sweep commits the deal data to this repo, and the
+dashboard fetches the raw file server-side on each request. The repo is public,
+so this needs no credentials at all. Set `DEALS_URL` to point somewhere else
+(a fork, or a private mirror behind a token-authenticated URL).
 
 ## Deploy to Vercel
 
 1. **New Project** → import the `christofferokolgrov/Ferie` repo.
 2. Set **Root Directory** to `dashboard`.
 3. Framework preset: **Next.js** (auto-detected).
-4. Add Environment Variables (same values as the GitHub Actions secrets):
-   - `SUPABASE_URL`
-   - `SUPABASE_SERVICE_ROLE_KEY`
+4. Add Environment Variables:
    - `GH_DISPATCH_TOKEN` — for the **Run screening now** button (see below).
-5. Deploy. The dashboard reads live data on each request (`force-dynamic`).
+   - `DEALS_URL` — optional; only if the deal data lives outside this repo.
+5. Deploy. The dashboard refetches the deal data on each request
+   (`force-dynamic`), so a sweep's commit shows up without a redeploy.
 
 ## "Run screening now" button
 
@@ -35,7 +36,7 @@ settings → Fine-grained tokens): scope it to the `Ferie` repo, permission
 ```bash
 cd dashboard
 npm install
-cp .env.example .env.local   # fill in the two values
+cp .env.example .env.local   # only needed for the Run button
 npm run dev                  # http://localhost:3000
 ```
 
@@ -43,4 +44,5 @@ npm run dev                  # http://localhost:3000
 
 - No auth in v1 — access is via the Vercel URL. Add Vercel password protection
   or a simple middleware login if you want it private.
-- Rows not seen in the last sweep (>2h) are dimmed as "stale".
+- Rows not seen in the last daily sweep (>26h) are dimmed as "stale"; deals
+  not re-seen for 72h are dropped by the sweep and hidden here.
