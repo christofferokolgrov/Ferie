@@ -417,7 +417,11 @@ grows a few keys a day. Under 1 MB a year.
   sorted → sweep commits are readable diffs.
 - **Persistence is git.** The workflow gained `permissions: contents: write` and
   a step that commits `data/` and pushes (with `git pull --rebase` in case the
-  branch moved). The `concurrency` group doubles as the write lock.
+  branch moved). The `concurrency` group doubles as the write lock. The commit
+  step is guarded to the default branch: a live test on the PR branch showed a
+  branch-run commit both pollutes the PR diff and queues a `tests` run that sits
+  at `action_required` forever (GitHub gates workflows the bot triggers), which
+  leaves the PR stuck at `mergeable_state: unstable`.
 - **Dashboard** fetches `data/deals.json` from `raw.githubusercontent.com` at
   request time. The repo is public, so this needs no token — the old
   SUPABASE_* env vars are gone from Vercel too. Filtering (TTL cutoff) and

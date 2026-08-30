@@ -72,7 +72,15 @@ jobs:
       # data/ is the store. Commit it so the next run remembers what we've
       # already emailed about, and so the dashboard can read it. `git pull
       # --rebase` guards against the branch having moved while the sweep ran.
+      #
+      # Only the default branch's copy is the store, so only it gets written.
+      # A branch run committing here would put data noise in that PR's diff,
+      # and the resulting bot push queues a `tests` run that sits unrunnable at
+      # "action_required" (GitHub gates workflows triggered by the bot), leaving
+      # the PR permanently un-green. Branch runs still read data/ from their
+      # checkout, so dedup behaves normally — they just don't persist.
       - name: Commit updated deal data
+        if: github.ref_name == github.event.repository.default_branch
         run: |
           if git diff --quiet -- data/; then
             echo "No data changes to commit."
