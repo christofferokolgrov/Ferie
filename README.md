@@ -56,9 +56,11 @@ commit is a readable diff rather than a reshuffled blob.
 
 Two consequences worth knowing:
 
-- **The sweep pushes to the repo.** It needs `contents: write` (already set in the
-  workflow) and produces one commit per run — fine at one run a day, noisy if the
-  cadence ever goes back to every 15 minutes.
+- **The sweep pushes to the repo**, but only from the default branch. It needs
+  `contents: write` (already set in the workflow) and produces one commit per run
+  — fine at one run a day, noisy if the cadence ever goes back to every 15
+  minutes. A sweep dispatched on a feature branch still runs and emails; it just
+  doesn't commit, so it leaves no data noise in that branch's PR.
 - **One writer at a time.** The workflow's `concurrency` group is the write lock;
   two overlapping sweeps would race on the same files.
 
