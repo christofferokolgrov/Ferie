@@ -28,6 +28,7 @@ import {
   VING_PAX_CONFIGS,
   DEPARTURE_AIRPORT,
   HORIZON_END_DATE,
+  MIN_LEAD_DAYS,
   PRICE_PER_PERSON_THRESHOLD,
   USER_AGENT,
   CF_SETTLE_MS,
@@ -49,12 +50,13 @@ import { launchClearedContext, withRetry } from './browser.mjs';
  * (kept as DATE — orderBy: PRICE + edges errors server-side). All injected
  * values are escaped the way they must appear inside the JSON-encoded query.
  */
-export function buildVingBody(template, { tripTypes, priceTo, dateTo, first = VING_PAGE_SIZE, after } = {}) {
+export function buildVingBody(template, { tripTypes, priceTo, dateFrom, dateTo, first = VING_PAGE_SIZE, after } = {}) {
   let q = template;
   if (first) q = q.replace(/first:\d+/, `first:${first}`);
   const inject = [
     tripTypes && `tripTypes:[${tripTypes}]`,
     priceTo != null && `priceTo:${priceTo}`,
+    dateFrom && `dateFrom:\\"${dateFrom}\\"`,
     dateTo && `dateTo:\\"${dateTo}\\"`,
     after && `after:\\"${after}\\"`,
   ].filter(Boolean).join(' ');
@@ -198,7 +200,7 @@ export function buildVingBookingUrl(p) {
  * @returns {Promise<{deals: object[], stats: object}>}
  */
 export async function sweepVing({ todayIso, template, fetchTrips }) {
-  const { endDate } = sweepWindow(todayIso, HORIZON_END_DATE);
+  const { startDate, endDate } = sweepWindow(todayIso, HORIZON_END_DATE, MIN_LEAD_DAYS);
 
   // Page through all matching packages (priced at/under our bar, within horizon).
   const nodes = [];
@@ -210,6 +212,7 @@ export async function sweepVing({ todayIso, template, fetchTrips }) {
     const body = buildVingBody(template, {
       tripTypes: VING_TRIP_TYPE,
       priceTo: PRICE_PER_PERSON_THRESHOLD,
+      dateFrom: startDate,
       dateTo: endDate,
       first: VING_PAGE_SIZE,
       after,
@@ -235,10 +238,19 @@ export async function sweepVing({ todayIso, template, fetchTrips }) {
   let priced = 0;
   let minPricePerPerson = null;
   let sampleRaw = null;
+  let outsideWindow = 0;
 
   for (const node of nodes) {
     tripsSeen += 1;
     if (sampleRaw === null) sampleRaw = node;
+    // dateFrom/dateTo are injected into the query, but the injection is
+    // best-effort (it self-heals against a changed page template), so re-check
+    // the window here — a dropped arg must not leak departures we don't want.
+    const departureDate = (node?.date?.raw ?? '').slice(0, 10) || null;
+    if (!departureDate || departureDate < startDate || departureDate > endDate) {
+      outsideWindow += 1;
+      continue;
+    }
     // Each distinct hotel on the node is its own deal (stable per-hotel key).
     for (const offer of packageOffersByHotel(node)) {
       packagesSeen += 1;
@@ -275,6 +287,7 @@ export async function sweepVing({ todayIso, template, fetchTrips }) {
       pages,
       failedCalls,
       tripsSeen,
+      outsideWindow,
       packagesSeen,
       priced,
       minPricePerPerson,

@@ -1,7 +1,7 @@
 // Locked sweep parameters (shared across sources).
 // Decisions made in the design grilling (see NOTES.md):
 //   - Poll once a day at 12:00 Norwegian time (cron concern; noted here for reference)
-//   - Horizon: fixed cutoff at 2027-01-01 (shrinks as that date approaches)
+//   - Horizon: departures from today+3 days out to a fixed cutoff at 2027-01-01
 //   - Durations: 1 week (7) and 2 weeks (14)
 //   - Deal rule: CurrentPricePerPerson < 3500 OR discount >= 70%
 
@@ -18,6 +18,12 @@ export const DURATION_GROUPS = [7, 14];
 // days-ahead horizon, this stays put — the window shrinks day by day as
 // "today" approaches it.
 export const HORIZON_END_DATE = '2027-01-01';
+
+// Minimum lead time: departures sooner than this many days from "today" are
+// out of scope (too close to actually book and travel). The sweep window
+// therefore starts at today+MIN_LEAD_DAYS, not today. Note the window closes
+// for good once today+MIN_LEAD_DAYS passes HORIZON_END_DATE.
+export const MIN_LEAD_DAYS = 3;
 
 // Party configurations to sweep. paxAges is Apollo's comma-separated age list
 // (18 = adult). Each party is searched independently (its per-person price and

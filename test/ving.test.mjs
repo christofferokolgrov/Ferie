@@ -18,6 +18,7 @@ test('buildVingBody injects args after orderBy and bumps page size', () => {
   const body = buildVingBody(TEMPLATE, {
     tripTypes: 'SPECIFIED',
     priceTo: 3500,
+    dateFrom: '2026-07-01',
     dateTo: '2026-08-17',
     first: 40,
     after: 'CUR123',
@@ -25,6 +26,7 @@ test('buildVingBody injects args after orderBy and bumps page size', () => {
   assert.match(body, /first:40/);
   assert.match(body, /tripTypes:\[SPECIFIED\]/);
   assert.match(body, /priceTo:3500/);
+  assert.match(body, /dateFrom:\\"2026-07-01\\"/);
   assert.match(body, /dateTo:\\"2026-08-17\\"/);
   assert.match(body, /after:\\"CUR123\\"/);
   // orderBy stays DATE (orderBy: PRICE + edges errors server-side).
@@ -166,6 +168,31 @@ test('sweepVing emits package deals per party, gated by free seats', async () =>
   assert.ok(deals.every((d) => d.key.startsWith('ving|') && d.bookingUrl));
   assert.equal(stats.packagesSeen, 3); // AAA, BBB, CCC (FLYA has no package offer)
   assert.equal(stats.minPricePerPerson, 1990);
+  assert.equal(stats.outsideWindow, 0);
+});
+
+test('sweepVing drops departures outside the window even if the API returns them', async () => {
+  // fakeSession pins todayIso 2026-06-28 → the window opens 2026-07-01.
+  // dateFrom is sent on the query, but the arg injection is best-effort, so the
+  // sweep must re-check: these come back regardless of what was asked for.
+  const tooSoon = {
+    ...SAMPLE_NODE, serialNumber: 10, date: { raw: '2026-06-30T00:00:00' }, numFreeSeats: 6,
+    offers: [{ type: 'specified', price: 1500, hotelCode: 'SOON' }],
+  };
+  const exactlyThreeDays = {
+    ...SAMPLE_NODE, serialNumber: 11, date: { raw: '2026-07-01T00:00:00' }, numFreeSeats: 6,
+    offers: [{ type: 'specified', price: 1600, hotelCode: 'EDGE' }],
+  };
+  const pastHorizon = {
+    ...SAMPLE_NODE, serialNumber: 12, date: { raw: '2027-03-01T00:00:00' }, numFreeSeats: 6,
+    offers: [{ type: 'specified', price: 1700, hotelCode: 'LATE' }],
+  };
+
+  const { deals, stats } = await sweepVing(fakeSession([tooSoon, exactlyThreeDays, pastHorizon]));
+
+  assert.deepEqual([...new Set(deals.map((d) => d.accommodationCode))], ['EDGE']);
+  assert.equal(stats.outsideWindow, 2);
+  assert.equal(stats.packagesSeen, 1); // only the in-window node is costed
 });
 
 test('VING_PAX_CONFIGS covers the three requested parties', () => {

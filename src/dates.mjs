@@ -15,8 +15,12 @@ export function addDays(iso, days) {
 
 /**
  * Build the sweep window for a given "today".
- * startDate = today, endDate = the fixed horizon cutoff date.
+ * startDate = today + `minLeadDays` (the minimum lead time before departure),
+ * endDate = the fixed horizon cutoff date.
+ *
+ * The window is empty when startDate > endDate — callers should treat that as
+ * "nothing to sweep" rather than querying a backwards range.
  */
-export function sweepWindow(todayIso, horizonEndDateIso) {
-  return { startDate: todayIso, endDate: horizonEndDateIso };
+export function sweepWindow(todayIso, horizonEndDateIso, minLeadDays = 0) {
+  return { startDate: addDays(todayIso, minLeadDays), endDate: horizonEndDateIso };
 }
