@@ -98,7 +98,8 @@ export const FINN_OPERATORS = ['tui', 'amisol', 'nazar'];
 export const FINN_TRIP_TYPE = 'spesifisert';
 
 // Cron cadence — informational; the schedule lives in the runner, not here.
-export const POLL_INTERVAL_MIN = 15;
+// One sweep a day, at 12:00 Norwegian time (see .github/workflows/sweep.yml).
+export const POLL_INTERVAL_MIN = 1440;
 
 // Deal rule thresholds (NOK). The per-person bar is tiered: a pricier package
 // still counts if it's high-star or all-inclusive. The highest applicable tier
