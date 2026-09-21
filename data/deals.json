@@ -1,120 +1,5 @@
 [
   {
-    "key": "apollo|EGHURAQU01|2026-12-05|7|4v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURAQU01",
-    "departure_date": "2026-12-05",
-    "duration_group": 7,
-    "pax": "4v2b",
-    "hotel": "Aqua Vista - powered by Playitas",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 4,
-    "distance_to_beach": 700,
-    "availability": 11,
-    "current_price": 34980,
-    "current_price_per_person": 5830,
-    "brochure_price": 62270,
-    "discount": 0.4382527701943151,
-    "reasons": [
-      "pp 5830 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-05&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A548420&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjA1Ojc6WTowOjA6SFJHOjIwMjYxMjA1VDEyNDA6MjAyNjEyMDVUMTkwNToyMDI2MTIxMlQyMDA1OjIwMjYxMjEzVDAxMTU6MjAyNjEyMDV8MjAyNjEyMTI6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyNzMwLzg1Nzg4MnwyNzA5MDQ2MzkvODU3ODgzOjoxLDIsMyw0LDUsNjoyNzA5MDI3MzB8MjcwOTA0NjM5Onw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJBUVUwMTpEUjUxLDEsMyw2fERSNTEsMiw0LDU6MjAyNjEyMDU6MjAyNjEyMTI6Tk9QSzoyMTAxNzgyNy83LzMyNjAvNzo7Ow&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
-  },
-  {
-    "key": "apollo|EGHURAQU01|2026-12-12|7|4v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURAQU01",
-    "departure_date": "2026-12-12",
-    "duration_group": 7,
-    "pax": "4v2b",
-    "hotel": "Aqua Vista - powered by Playitas",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 4,
-    "distance_to_beach": 700,
-    "availability": 13,
-    "current_price": 34364,
-    "current_price_per_person": 5728,
-    "brochure_price": 60130,
-    "discount": 0.42850490603692004,
-    "reasons": [
-      "pp 5728 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A548420&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjEyOjc6WTowOjA6SFJHOjIwMjYxMjEyVDEyNDA6MjAyNjEyMTJUMTkwNToyMDI2MTIxOVQyMDA1OjIwMjYxMjIwVDAxMTU6MjAyNjEyMTJ8MjAyNjEyMTk6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyODEzLzg1Nzg4NHwyNzA5MDQ3MjIvODU3ODg1OjoxLDIsMyw0LDUsNjoyNzA5MDI4MTN8MjcwOTA0NzIyOnw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJBUVUwMTpEUjUxLDEsMyw2fERSNTEsMiw0LDU6MjAyNjEyMTI6MjAyNjEyMTk6Tk9QSzoyMTAxNzgyNy83LzMyNjcvNzo7Ow&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
-  },
-  {
-    "key": "apollo|EGHURARA01|2026-12-05|7|2v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURARA01",
-    "departure_date": "2026-12-05",
-    "duration_group": 7,
-    "pax": "2v2b",
-    "hotel": "Arabella Azur Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 3.5,
-    "distance_to_beach": 0,
-    "availability": 17,
-    "current_price": 22874,
-    "current_price_per_person": 5719,
-    "brochure_price": 40254,
-    "discount": 0.4317583345754459,
-    "reasons": [
-      "pp 5719 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-05&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A409602&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMDU6NzpZOjA6MDpIUkc6MjAyNjEyMDVUMTI0MDoyMDI2MTIwNVQxOTA1OjIwMjYxMjEyVDIwMDU6MjAyNjEyMTNUMDExNToyMDI2MTIwNXwyMDI2MTIxMjpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI3MzAvODU3ODgyfDI3MDkwNDYzOS84NTc4ODM6OjEsMiwzLDQ6MjcwOTAyNzMwfDI3MDkwNDYzOTp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSQVJBMDE6RFIwMSwxLDIsNCwzOjIwMjYxMjA1OjIwMjYxMjEyOk5PUEs6MjAzODYwNzQvNy8zMjYwLzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.191Z"
-  },
-  {
-    "key": "apollo|EGHURARA01|2026-12-05|7|4v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURARA01",
-    "departure_date": "2026-12-05",
-    "duration_group": 7,
-    "pax": "4v2b",
-    "hotel": "Arabella Azur Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 3.5,
-    "distance_to_beach": 0,
-    "availability": 16,
-    "current_price": 33152,
-    "current_price_per_person": 5526,
-    "brochure_price": 62006,
-    "discount": 0.46534206367125763,
-    "reasons": [
-      "pp 5526 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-05&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A409602&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjA1Ojc6WTowOjA6SFJHOjIwMjYxMjA1VDEyNDA6MjAyNjEyMDVUMTkwNToyMDI2MTIxMlQyMDA1OjIwMjYxMjEzVDAxMTU6MjAyNjEyMDV8MjAyNjEyMTI6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyNzMwLzg1Nzg4MnwyNzA5MDQ2MzkvODU3ODgzOjoxLDIsMyw0LDUsNjoyNzA5MDI3MzB8MjcwOTA0NjM5Onw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJBUkEwMTpEUjAxLDEsMyw2fERSMDEsMiw0LDU6MjAyNjEyMDU6MjAyNjEyMTI6Tk9QSzoyMDM4NjA3NC83LzMyNjAvNzo7Ow&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
-  },
-  {
-    "key": "apollo|EGHURARA01|2026-12-12|7|2v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURARA01",
-    "departure_date": "2026-12-12",
-    "duration_group": 7,
-    "pax": "2v2b",
-    "hotel": "Arabella Azur Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 3.5,
-    "distance_to_beach": 0,
-    "availability": 21,
-    "current_price": 22271,
-    "current_price_per_person": 5568,
-    "brochure_price": 38775,
-    "discount": 0.42563507414571244,
-    "reasons": [
-      "pp 5568 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A409602&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMTI6NzpZOjA6MDpIUkc6MjAyNjEyMTJUMTI0MDoyMDI2MTIxMlQxOTA1OjIwMjYxMjE5VDIwMDU6MjAyNjEyMjBUMDExNToyMDI2MTIxMnwyMDI2MTIxOTpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI4MTMvODU3ODg0fDI3MDkwNDcyMi84NTc4ODU6OjEsMiwzLDQ6MjcwOTAyODEzfDI3MDkwNDcyMjp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSQVJBMDE6RFIwMSwxLDIsNCwzOjIwMjYxMjEyOjIwMjYxMjE5Ok5PUEs6MjAzODYwNzQvNy8zMjY3Lzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
-  },
-  {
     "key": "apollo|EGHURARA01|2026-12-12|7|4v2b",
     "operator": "apollo",
     "accommodation_code": "EGHURARA01",
@@ -135,76 +20,7 @@
       "pp 5992 < 6000 (all-inclusive)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A409602&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjEyOjc6WTowOjA6SFJHOjIwMjYxMjEyVDEyNDA6MjAyNjEyMTJUMTkwNToyMDI2MTIxOVQyMDA1OjIwMjYxMjIwVDAxMTU6MjAyNjEyMTJ8MjAyNjEyMTk6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyODEzLzg1Nzg4NHwyNzA5MDQ3MjIvODU3ODg1OjoxLDIsMyw0LDUsNjoyNzA5MDI4MTN8MjcwOTA0NzIyOnw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJBUkEwMTpEUjAxLDEsMyw2fERSMDEsMiw0LDU6MjAyNjEyMTI6MjAyNjEyMTk6Tk9QSzoyMDM4NjA3NC83LzMyNjcvNzo7Ow&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-20T14:08:46.657Z"
-  },
-  {
-    "key": "apollo|EGHURARB01|2026-12-05|7|4v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURARB01",
-    "departure_date": "2026-12-05",
-    "duration_group": 7,
-    "pax": "4v2b",
-    "hotel": "Arabia Azur Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 3.5,
-    "distance_to_beach": 0,
-    "availability": 4,
-    "current_price": 35118,
-    "current_price_per_person": 5853,
-    "brochure_price": 63864,
-    "discount": 0.4501127395715896,
-    "reasons": [
-      "pp 5853 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-05&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A507997&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjA1Ojc6WTowOjA6SFJHOjIwMjYxMjA1VDEyNDA6MjAyNjEyMDVUMTkwNToyMDI2MTIxMlQyMDA1OjIwMjYxMjEzVDAxMTU6MjAyNjEyMDV8MjAyNjEyMTI6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyNzMwLzg1Nzg4MnwyNzA5MDQ2MzkvODU3ODgzOjoxLDIsMyw0LDUsNjoyNzA5MDI3MzB8MjcwOTA0NjM5Onw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJBUkIwMTpEUjAzLDEsMyw2fERSMDMsMiw0LDU6MjAyNjEyMDU6MjAyNjEyMTI6Tk9QSzoyMDQ1MjgyMy83LzMyNjAvNzo7Ow&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
-  },
-  {
-    "key": "apollo|EGHURARB01|2026-12-12|7|2v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURARB01",
-    "departure_date": "2026-12-12",
-    "duration_group": 7,
-    "pax": "2v2b",
-    "hotel": "Arabia Azur Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 3.5,
-    "distance_to_beach": 0,
-    "availability": 12,
-    "current_price": 22574,
-    "current_price_per_person": 5644,
-    "brochure_price": 38652,
-    "discount": 0.4159681258408362,
-    "reasons": [
-      "pp 5644 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A507997&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMTI6NzpZOjA6MDpIUkc6MjAyNjEyMTJUMTI0MDoyMDI2MTIxMlQxOTA1OjIwMjYxMjE5VDIwMDU6MjAyNjEyMjBUMDExNToyMDI2MTIxMnwyMDI2MTIxOTpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI4MTMvODU3ODg0fDI3MDkwNDcyMi84NTc4ODU6OjEsMiwzLDQ6MjcwOTAyODEzfDI3MDkwNDcyMjp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSQVJCMDE6RFIwMiwxLDIsNCwzOjIwMjYxMjEyOjIwMjYxMjE5Ok5PUEs6MjA0NTI4MjMvNy8zMjY3Lzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
-  },
-  {
-    "key": "apollo|EGHURARB01|2026-12-12|7|4v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURARB01",
-    "departure_date": "2026-12-12",
-    "duration_group": 7,
-    "pax": "4v2b",
-    "hotel": "Arabia Azur Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 3.5,
-    "distance_to_beach": 0,
-    "availability": 11,
-    "current_price": 33618,
-    "current_price_per_person": 5603,
-    "brochure_price": 59268,
-    "discount": 0.432779914962543,
-    "reasons": [
-      "pp 5603 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A507997&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjEyOjc6WTowOjA6SFJHOjIwMjYxMjEyVDEyNDA6MjAyNjEyMTJUMTkwNToyMDI2MTIxOVQyMDA1OjIwMjYxMjIwVDAxMTU6MjAyNjEyMTJ8MjAyNjEyMTk6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyODEzLzg1Nzg4NHwyNzA5MDQ3MjIvODU3ODg1OjoxLDIsMyw0LDUsNjoyNzA5MDI4MTN8MjcwOTA0NzIyOnw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJBUkIwMTpEUjAyLDEsMyw2fERSMDIsMiw0LDU6MjAyNjEyMTI6MjAyNjEyMTk6Tk9QSzoyMDQ1MjgyMy83LzMyNjcvNzo7Ow&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
+    "last_seen_at": "2026-09-21T16:26:32.097Z"
   },
   {
     "key": "apollo|EGHURBEL01|2026-12-12|7|2v2b",
@@ -227,53 +43,7 @@
       "pp 5291 < 6000 (all-inclusive)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A496772&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMTI6NzpZOjA6MDpIUkc6MjAyNjEyMTJUMTI0MDoyMDI2MTIxMlQxOTA1OjIwMjYxMjE5VDIwMDU6MjAyNjEyMjBUMDExNToyMDI2MTIxMnwyMDI2MTIxOTpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI4MTMvODU3ODg0fDI3MDkwNDcyMi84NTc4ODU6OjEsMiwzLDQ6MjcwOTAyODEzfDI3MDkwNDcyMjp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSQkVMMDE6RjIwMSwxLDIsNCwzOjIwMjYxMjEyOjIwMjYxMjE5Ok5PUEs6MjAzODYxMDEvNy8zMjY3Lzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-20T14:08:46.657Z"
-  },
-  {
-    "key": "apollo|EGHURSAA01|2026-12-05|7|2v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURSAA01",
-    "departure_date": "2026-12-05",
-    "duration_group": 7,
-    "pax": "2v2b",
-    "hotel": "Sunrise Alora Aqua Park Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 4,
-    "distance_to_beach": 0,
-    "availability": 1,
-    "current_price": 23630,
-    "current_price_per_person": 5908,
-    "brochure_price": 43264,
-    "discount": 0.45381841715976334,
-    "reasons": [
-      "pp 5908 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-05&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A76z0RncIYfkEyPhlMyXzGo&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMDU6NzpZOjA6MDpIUkc6MjAyNjEyMDVUMTI0MDoyMDI2MTIwNVQxOTA1OjIwMjYxMjEyVDIwMDU6MjAyNjEyMTNUMDExNToyMDI2MTIwNXwyMDI2MTIxMjpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI3MzAvODU3ODgyfDI3MDkwNDYzOS84NTc4ODM6OjEsMiwzLDQ6MjcwOTAyNzMwfDI3MDkwNDYzOTp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSU0FBMDE6RlUwMSwxLDIsNCwzOjIwMjYxMjA1OjIwMjYxMjEyOk5PUEs6MjYwNjc2MDUyLzcvMzI2MC83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.191Z"
-  },
-  {
-    "key": "apollo|EGHURSAA01|2026-12-12|7|4v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURSAA01",
-    "departure_date": "2026-12-12",
-    "duration_group": 7,
-    "pax": "4v2b",
-    "hotel": "Sunrise Alora Aqua Park Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 4,
-    "distance_to_beach": 0,
-    "availability": 4,
-    "current_price": 34756,
-    "current_price_per_person": 5793,
-    "brochure_price": 64102,
-    "discount": 0.45780162865433216,
-    "reasons": [
-      "pp 5793 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A76z0RncIYfkEyPhlMyXzGo&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjEyOjc6WTowOjA6SFJHOjIwMjYxMjEyVDEyNDA6MjAyNjEyMTJUMTkwNToyMDI2MTIxOVQyMDA1OjIwMjYxMjIwVDAxMTU6MjAyNjEyMTJ8MjAyNjEyMTk6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyODEzLzg1Nzg4NHwyNzA5MDQ3MjIvODU3ODg1OjoxLDIsMyw0LDUsNjoyNzA5MDI4MTN8MjcwOTA0NzIyOnw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJTQUEwMTpEUjAzLDEsMyw2fERSMDMsMiw0LDU6MjAyNjEyMTI6MjAyNjEyMTk6Tk9QSzoyNjA2NzYwNTIvNy8zMjY3Lzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.192Z"
+    "last_seen_at": "2026-09-21T16:26:32.097Z"
   },
   {
     "key": "apollo|ESBHZMFE01|2026-12-12|7|2v2b",
@@ -288,38 +58,15 @@
     "stars": 4,
     "distance_to_beach": 350,
     "availability": 12,
-    "current_price": 17956,
-    "current_price_per_person": 4489,
+    "current_price": 16220,
+    "current_price_per_person": 4055,
     "brochure_price": 37044,
-    "discount": 0.5152791275240255,
+    "discount": 0.562142317244358,
     "reasons": [
-      "pp 4489 < 4500 (4★+)"
+      "pp 4055 < 4500 (4★+)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A1250144&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ3MTpTSzc0NzI6MjAyNjEyMTI6NzpZOjA6MDpMUEE6MjAyNjEyMTJUMTAxMDoyMDI2MTIxMlQxNTA1OjIwMjYxMjE5VDE2MDU6MjAyNjEyMTlUMjI0MDoyMDI2MTIxMnwyMDI2MTIxOTpPU0xMUEE2Mk9TTExQQXxPU0xMUEE2MkxQQU9TTDo6fDoyNjE3NTUzMDkvODM5NzQ3fDI2MTc1NzYzMy84Mzk3NDg6OjEsMiwzLDQ6MjYxNzU1MzA5fDI2MTc1NzYzMzp8Onw6fDo6OlNLOlNLfFNLOjc0NzF8NzQ3MjoxfDI6O0VTQkhaTUZFMDE6MkE1MywxLDIsNCwzOjIwMjYxMjEyOjIwMjYxMjE5Ok5PUEs6MjE4NDI1MTc1LzcvMzI2Ny83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-20T14:08:46.657Z"
-  },
-  {
-    "key": "apollo|ESCORROB01|2026-12-11|7|2v2b",
-    "operator": "apollo",
-    "accommodation_code": "ESCORROB01",
-    "departure_date": "2026-12-11",
-    "duration_group": 7,
-    "pax": "2v2b",
-    "hotel": "Riu Oliva Beach Resort",
-    "destination": "Spania – Kanariøyene – Fuerteventura – Corralejo",
-    "meal_plan": "All Inclusive",
-    "stars": 3,
-    "distance_to_beach": 150,
-    "availability": 1,
-    "current_price": 23574,
-    "current_price_per_person": 5894,
-    "brochure_price": 36072,
-    "discount": 0.34647371922821024,
-    "reasons": [
-      "pp 5894 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-11&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A1623287&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQxOTpTSzc0MjA6MjAyNjEyMTE6NzpZOjA6MDpGVUU6MjAyNjEyMTFUMDc0MDoyMDI2MTIxMVQxMjIwOjIwMjYxMjE4VDEzMzA6MjAyNjEyMThUMjAwMDoyMDI2MTIxMXwyMDI2MTIxODpPU0xGVUU1MU9TTEZVRXxPU0xGVUU1MUZVRU9TTDo6fDoyNjE4MTg1MTcvODQyNzA0fDI2MTgyMDg4Ni84NDI3MDU6OjEsMiwzLDQ6MjYxODE4NTE3fDI2MTgyMDg4Njp8Onw6fDo6OlNLOlNLfFNLOjc0MTl8NzQyMDoxfDI6O0VTQ09SUk9CMDE6RjIwMSwxLDIsNCwzOjIwMjYxMjExOjIwMjYxMjE4Ok5PUEs6MjI1MzAwMzgyLzcvMzI2Ni83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-18T14:23:26.191Z"
+    "last_seen_at": "2026-09-21T16:26:32.097Z"
   },
   {
     "key": "apollo|ESPRILUF01|2026-12-12|7|2v2b",
@@ -334,15 +81,15 @@
     "stars": 3,
     "distance_to_beach": 1200,
     "availability": 1,
-    "current_price": 12860,
-    "current_price_per_person": 3215,
+    "current_price": 11616,
+    "current_price_per_person": 2904,
     "brochure_price": 32996,
-    "discount": 0.610255788580434,
+    "discount": 0.6479573281609892,
     "reasons": [
-      "pp 3215 < 3500"
+      "pp 2904 < 3500"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A1045141&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ3MTpTSzc0NzI6MjAyNjEyMTI6NzpZOjA6MDpMUEE6MjAyNjEyMTJUMTAxMDoyMDI2MTIxMlQxNTA1OjIwMjYxMjE5VDE2MDU6MjAyNjEyMTlUMjI0MDoyMDI2MTIxMnwyMDI2MTIxOTpPU0xMUEE2Mk9TTExQQXxPU0xMUEE2MkxQQU9TTDo6fDoyNjE3NTUzMDkvODM5NzQ3fDI2MTc1NzYzMy84Mzk3NDg6OjEsMiwzLDQ6MjYxNzU1MzA5fDI2MTc1NzYzMzp8Onw6fDo6OlNLOlNLfFNLOjc0NzF8NzQ3MjoxfDI6O0VTUFJJTFVGMDE6MkE1MSwxLDIsNCwzOjIwMjYxMjEyOjIwMjYxMjE5Ok5PUEs6MTk1NDE0ODA2LzcvMzI2Ny83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-20T14:08:46.657Z"
+    "last_seen_at": "2026-09-21T16:26:32.097Z"
   },
   {
     "key": "apollo|ESSAVATH01|2026-12-06|7|2v2b",
@@ -365,7 +112,7 @@
       "pp 4194 < 4500 (4★+)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-06&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A56QROCw5KPckMYfNxs7ZFz&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQwNzpTSzc0MDg6MjAyNjEyMDY6NzpZOjA6MDpURlM6MjAyNjEyMDZUMDgwMDoyMDI2MTIwNlQxMzAwOjIwMjYxMjEzVDE0MDA6MjAyNjEyMTNUMjAzMDoyMDI2MTIwNnwyMDI2MTIxMzpPU0xURlM3MU9TTFRGU3xPU0xURlM3MVRGU09TTDo6fDoyNjE3ODk0MTkvODQxMzMzfDI2MTc5MTc0My84NDEzMzQ6OjEsMiwzLDQ6MjYxNzg5NDE5fDI2MTc5MTc0Mzp8Onw6fDo6OlNLOlNLfFNLOjc0MDd8NzQwODoxfDI6O0VTU0FWQVRIMDE6MUE1MSwxLDIsNCwzOjIwMjYxMjA2OjIwMjYxMjEzOk5PUEs6MTE1NDE1MjgxLzcvMzI2MS83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-20T14:08:46.657Z"
+    "last_seen_at": "2026-09-21T16:26:32.097Z"
   },
   {
     "key": "apollo|ESSAVATH01|2026-12-13|7|2v2b",
@@ -388,6 +135,6 @@
       "pp 4175 < 4500 (4★+)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-13&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A56QROCw5KPckMYfNxs7ZFz&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQwNzpTSzc0MDg6MjAyNjEyMTM6NzpZOjA6MDpURlM6MjAyNjEyMTNUMDgwMDoyMDI2MTIxM1QxMzAwOjIwMjYxMjIwVDE0MDA6MjAyNjEyMjBUMjAzMDoyMDI2MTIxM3wyMDI2MTIyMDpPU0xURlM3MU9TTFRGU3xPU0xURlM3MVRGU09TTDo6fDoyNjE3ODk1MDIvODQxMzM1fDI2MTc5MTgyNi84NDEzMzY6OjEsMiwzLDQ6MjYxNzg5NTAyfDI2MTc5MTgyNjp8Onw6fDo6OlNLOlNLfFNLOjc0MDd8NzQwODoxfDI6O0VTU0FWQVRIMDE6MUg1MSwxLDIsNCwzOjIwMjYxMjEzOjIwMjYxMjIwOk5PUEs6MTE1NDE1MjgxLzcvMzI2OC83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-09-20T14:08:46.657Z"
+    "last_seen_at": "2026-09-21T16:26:32.097Z"
   }
 ]
