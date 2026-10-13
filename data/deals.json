@@ -1,28 +1,5 @@
 [
   {
-    "key": "apollo|EGHURARA01|2026-12-05|7|2v2b",
-    "operator": "apollo",
-    "accommodation_code": "EGHURARA01",
-    "departure_date": "2026-12-05",
-    "duration_group": 7,
-    "pax": "2v2b",
-    "hotel": "Arabella Azur Resort",
-    "destination": "Egypt – Hurghada",
-    "meal_plan": "All Inclusive",
-    "stars": 3.5,
-    "distance_to_beach": 0,
-    "availability": 1,
-    "current_price": 22483,
-    "current_price_per_person": 5621,
-    "brochure_price": 40463,
-    "discount": 0.44435657267132933,
-    "reasons": [
-      "pp 5621 < 6000 (all-inclusive)"
-    ],
-    "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-05&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A409602&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMDU6NzpZOjA6MDpIUkc6MjAyNjEyMDVUMTI1MDoyMDI2MTIwNVQxOTE1OjIwMjYxMjEyVDIwMTU6MjAyNjEyMTNUMDEyNToyMDI2MTIwNXwyMDI2MTIxMjpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI3MzAvODU3ODgyfDI3MDkwNDYzOS84NTc4ODM6OjEsMiwzLDQ6MjcwOTAyNzMwfDI3MDkwNDYzOTp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSQVJBMDE6RFIwMSwxLDIsNCwzOjIwMjYxMjA1OjIwMjYxMjEyOk5PUEs6MjAzODYwNzQvNy8zMjYwLzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-10T15:51:40.299Z"
-  },
-  {
     "key": "apollo|EGHURARA01|2026-12-12|7|2v2b",
     "operator": "apollo",
     "accommodation_code": "EGHURARA01",
@@ -43,7 +20,7 @@
       "pp 5468 < 6000 (all-inclusive)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A409602&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMTI6NzpZOjA6MDpIUkc6MjAyNjEyMTJUMTI1MDoyMDI2MTIxMlQxOTE1OjIwMjYxMjE5VDIwMTU6MjAyNjEyMjBUMDEyNToyMDI2MTIxMnwyMDI2MTIxOTpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI4MTMvODU3ODg0fDI3MDkwNDcyMi84NTc4ODU6OjEsMiwzLDQ6MjcwOTAyODEzfDI3MDkwNDcyMjp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSQVJBMDE6RFIwMSwxLDIsNCwzOjIwMjYxMjEyOjIwMjYxMjE5Ok5PUEs6MjAzODYwNzQvNy8zMjY3Lzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "apollo|EGHURARA01|2026-12-12|7|4v2b",
@@ -66,7 +43,7 @@
       "pp 5392 < 6000 (all-inclusive)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A409602&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjEyOjc6WTowOjA6SFJHOjIwMjYxMjEyVDEyNTA6MjAyNjEyMTJUMTkxNToyMDI2MTIxOVQyMDE1OjIwMjYxMjIwVDAxMjU6MjAyNjEyMTJ8MjAyNjEyMTk6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyODEzLzg1Nzg4NHwyNzA5MDQ3MjIvODU3ODg1OjoxLDIsMyw0LDUsNjoyNzA5MDI4MTN8MjcwOTA0NzIyOnw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJBUkEwMTpEUjAxLDEsMyw2fERSMDEsMiw0LDU6MjAyNjEyMTI6MjAyNjEyMTk6Tk9QSzoyMDM4NjA3NC83LzMyNjcvNzo7Ow&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "apollo|EGHURARB01|2026-12-12|7|2v2b",
@@ -89,7 +66,7 @@
       "pp 5981 < 6000 (all-inclusive)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A507997&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQ0MTpTSzc0NDI6MjAyNjEyMTI6NzpZOjA6MDpIUkc6MjAyNjEyMTJUMTI1MDoyMDI2MTIxMlQxOTE1OjIwMjYxMjE5VDIwMTU6MjAyNjEyMjBUMDEyNToyMDI2MTIxMnwyMDI2MTIxOTpPU0xIUkc2MU9TTEhSR3xPU0xIUkc2MUhSR09TTDo6fDoyNzA5MDI4MTMvODU3ODg0fDI3MDkwNDcyMi84NTc4ODU6OjEsMiwzLDQ6MjcwOTAyODEzfDI3MDkwNDcyMjp8Onw6fDo6OlNLOlNLfFNLOjc0NDF8NzQ0MjoxfDI6O0VHSFVSQVJCMDE6RFIwMiwxLDIsNCwzOjIwMjYxMjEyOjIwMjYxMjE5Ok5PUEs6MjA0NTI4MjMvNy8zMjY3Lzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "apollo|EGHURBEL01|2026-12-12|7|2v2b",
@@ -135,7 +112,7 @@
       "pp 5826 < 6000 (all-inclusive)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C18%2C18%2C9%2C12&departureDate=2026-12-12&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A76z0RncIYfkEyPhlMyXzGo&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzMTgsMDQxOCwwNTksMDYxMjs4Ok9TTDpTSzc0NDE6U0s3NDQyOjIwMjYxMjEyOjc6WTowOjA6SFJHOjIwMjYxMjEyVDEyNTA6MjAyNjEyMTJUMTkxNToyMDI2MTIxOVQyMDE1OjIwMjYxMjIwVDAxMjU6MjAyNjEyMTJ8MjAyNjEyMTk6T1NMSFJHNjFPU0xIUkd8T1NMSFJHNjFIUkdPU0w6Onw6MjcwOTAyODEzLzg1Nzg4NHwyNzA5MDQ3MjIvODU3ODg1OjoxLDIsMyw0LDUsNjoyNzA5MDI4MTN8MjcwOTA0NzIyOnw6fDp8Ojo6U0s6U0t8U0s6NzQ0MXw3NDQyOjF8Mjo7RUdIVVJTQUEwMTpEUjAyLDEsMyw2fERSMDIsMiw0LDU6MjAyNjEyMTI6MjAyNjEyMTk6Tk9QSzoyNjA2NzYwNTIvNy8zMjY3Lzc6Ozs&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "apollo|ESSAVATH01|2026-11-29|7|2v2b",
@@ -150,15 +127,15 @@
     "stars": 4,
     "distance_to_beach": 150,
     "availability": 6,
-    "current_price": 16777,
-    "current_price_per_person": 4195,
-    "brochure_price": 33988,
-    "discount": 0.5063846063316464,
+    "current_price": 17446,
+    "current_price_per_person": 4362,
+    "brochure_price": 34657,
+    "discount": 0.49660963153186943,
     "reasons": [
-      "pp 4195 < 4500 (4★+)"
+      "pp 4362 < 4500 (4★+)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-11-29&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A56QROCw5KPckMYfNxs7ZFz&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQwNzpTSzc0MDg6MjAyNjExMjk6NzpZOjA6MDpURlM6MjAyNjExMjlUMDgwMDoyMDI2MTEyOVQxMzAwOjIwMjYxMjA2VDE0MDA6MjAyNjEyMDZUMjAzMDoyMDI2MTEyOXwyMDI2MTIwNjpPU0xURlM3MU9TTFRGU3xPU0xURlM3MVRGU09TTDo6fDoyNjE3ODkzMzYvODQxMzMxfDI2MTc5MTY2MC84NDEzMzI6OjEsMiwzLDQ6MjYxNzg5MzM2fDI2MTc5MTY2MDp8Onw6fDo6OlNLOlNLfFNLOjc0MDd8NzQwODoxfDI6O0VTU0FWQVRIMDE6MUE1MSwxLDIsNCwzOjIwMjYxMTI5OjIwMjYxMjA2Ok5PUEs6MTE1NDE1MjgxLzcvMzI1NC83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "apollo|ESSAVATH01|2026-12-06|7|2v2b",
@@ -173,15 +150,15 @@
     "stars": 4,
     "distance_to_beach": 150,
     "availability": 7,
-    "current_price": 16649,
-    "current_price_per_person": 4163,
-    "brochure_price": 33138,
-    "discount": 0.49758585309916104,
+    "current_price": 17317,
+    "current_price_per_person": 4330,
+    "brochure_price": 33806,
+    "discount": 0.4877536531976572,
     "reasons": [
-      "pp 4163 < 4500 (4★+)"
+      "pp 4330 < 4500 (4★+)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-06&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A56QROCw5KPckMYfNxs7ZFz&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQwNzpTSzc0MDg6MjAyNjEyMDY6NzpZOjA6MDpURlM6MjAyNjEyMDZUMDgwMDoyMDI2MTIwNlQxMzAwOjIwMjYxMjEzVDE0MDA6MjAyNjEyMTNUMjAzMDoyMDI2MTIwNnwyMDI2MTIxMzpPU0xURlM3MU9TTFRGU3xPU0xURlM3MVRGU09TTDo6fDoyNjE3ODk0MTkvODQxMzMzfDI2MTc5MTc0My84NDEzMzQ6OjEsMiwzLDQ6MjYxNzg5NDE5fDI2MTc5MTc0Mzp8Onw6fDo6OlNLOlNLfFNLOjc0MDd8NzQwODoxfDI6O0VTU0FWQVRIMDE6MUE1MSwxLDIsNCwzOjIwMjYxMjA2OjIwMjYxMjEzOk5PUEs6MTE1NDE1MjgxLzcvMzI2MS83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "apollo|ESSAVATH01|2026-12-13|7|2v2b",
@@ -196,15 +173,15 @@
     "stars": 4,
     "distance_to_beach": 150,
     "availability": 1,
-    "current_price": 16574,
-    "current_price_per_person": 4144,
-    "brochure_price": 34986,
-    "discount": 0.5262676499171097,
+    "current_price": 17158,
+    "current_price_per_person": 4290,
+    "brochure_price": 35570,
+    "discount": 0.5176272139443352,
     "reasons": [
-      "pp 4144 < 4500 (4★+)"
+      "pp 4290 < 4500 (4★+)"
     ],
     "booking_url": "https://www.apollo.no/booking-guide/core/select-unit-and-meal?departureAirportCode=OSL&paxAges=18%2C18%2C9%2C12&departureDate=2026-12-13&duration=7&accommodationUri=der%3Aaccommodation%3Adtno%3A56QROCw5KPckMYfNxs7ZFz&productId=ODtQO05PUEs7MDExOCwwMjE4LDAzOSwwNDEyOzg6T1NMOlNLNzQwNzpTSzc0MDg6MjAyNjEyMTM6NzpZOjA6MDpURlM6MjAyNjEyMTNUMDgwMDoyMDI2MTIxM1QxMzAwOjIwMjYxMjIwVDE0MDA6MjAyNjEyMjBUMjAzMDoyMDI2MTIxM3wyMDI2MTIyMDpPU0xURlM3MU9TTFRGU3xPU0xURlM3MVRGU09TTDo6fDoyNjE3ODk1MDIvODQxMzM1fDI2MTc5MTgyNi84NDEzMzY6OjEsMiwzLDQ6MjYxNzg5NTAyfDI2MTc5MTgyNjp8Onw6fDo6OlNLOlNLfFNLOjc0MDd8NzQwODoxfDI6O0VTU0FWQVRIMDE6MUg1MSwxLDIsNCwzOjIwMjYxMjEzOjIwMjYxMjIwOk5PUEs6MTE1NDE1MjgxLzcvMzI2OC83Ojs7&searchProductCategoryCodes=FlightAndHotel",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "ving|APPZ|2026-12-06|8|2v",
@@ -227,7 +204,7 @@
       "pp 3445 < 3500"
     ],
     "booking_url": "https://www.ving.no/restplass-hotell?SelectedDestCd=TFS&SelectedDepCd=OSL&QueryDepDate=20261206&QueryDur=8&QueryRoomAges=42,42&QueryUnits=1&SelectedHotCd=APPZ&QueryResID=4379&QueryCtryID=4328&QueryAreaID=4382&QueryDepID=12667&SelectedSerNo=71&price=6890",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "ving|APPZ|2026-12-06|8|4v",
@@ -250,7 +227,7 @@
       "pp 3445 < 3500"
     ],
     "booking_url": "https://www.ving.no/restplass-hotell?SelectedDestCd=TFS&SelectedDepCd=OSL&QueryDepDate=20261206&QueryDur=8&QueryRoomAges=42,42,42,42&QueryUnits=1&SelectedHotCd=APPZ&QueryResID=4379&QueryCtryID=4328&QueryAreaID=4382&QueryDepID=12667&SelectedSerNo=71&price=13780",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "ving|APPZ|2026-12-06|8|4v2b",
@@ -273,7 +250,76 @@
       "pp 3445 < 3500"
     ],
     "booking_url": "https://www.ving.no/restplass-hotell?SelectedDestCd=TFS&SelectedDepCd=OSL&QueryDepDate=20261206&QueryDur=8&QueryRoomAges=42,42,42,42,9,12&QueryUnits=1&SelectedHotCd=APPZ&QueryResID=4379&QueryCtryID=4328&QueryAreaID=4382&QueryDepID=12667&SelectedSerNo=71&price=20670",
-    "last_seen_at": "2026-10-12T19:48:23.396Z"
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
+  },
+  {
+    "key": "ving|BAMB|2026-11-29|8|2v",
+    "operator": "ving",
+    "accommodation_code": "BAMB",
+    "departure_date": "2026-11-29",
+    "duration_group": 8,
+    "pax": "2v",
+    "hotel": "Tenerife (BAMB)",
+    "destination": "Spania – Tenerife",
+    "meal_plan": null,
+    "stars": null,
+    "distance_to_beach": null,
+    "availability": 9,
+    "current_price": null,
+    "current_price_per_person": 3445,
+    "brochure_price": null,
+    "discount": null,
+    "reasons": [
+      "pp 3445 < 3500"
+    ],
+    "booking_url": "https://www.ving.no/restplass-hotell?SelectedDestCd=TFS&SelectedDepCd=OSL&QueryDepDate=20261129&QueryDur=8&QueryRoomAges=42,42&QueryUnits=1&SelectedHotCd=BAMB&QueryResID=4379&QueryCtryID=4328&QueryAreaID=4382&QueryDepID=12667&SelectedSerNo=71&price=6890",
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
+  },
+  {
+    "key": "ving|BAMB|2026-11-29|8|4v",
+    "operator": "ving",
+    "accommodation_code": "BAMB",
+    "departure_date": "2026-11-29",
+    "duration_group": 8,
+    "pax": "4v",
+    "hotel": "Tenerife (BAMB)",
+    "destination": "Spania – Tenerife",
+    "meal_plan": null,
+    "stars": null,
+    "distance_to_beach": null,
+    "availability": 9,
+    "current_price": null,
+    "current_price_per_person": 3445,
+    "brochure_price": null,
+    "discount": null,
+    "reasons": [
+      "pp 3445 < 3500"
+    ],
+    "booking_url": "https://www.ving.no/restplass-hotell?SelectedDestCd=TFS&SelectedDepCd=OSL&QueryDepDate=20261129&QueryDur=8&QueryRoomAges=42,42,42,42&QueryUnits=1&SelectedHotCd=BAMB&QueryResID=4379&QueryCtryID=4328&QueryAreaID=4382&QueryDepID=12667&SelectedSerNo=71&price=13780",
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
+  },
+  {
+    "key": "ving|BAMB|2026-11-29|8|4v2b",
+    "operator": "ving",
+    "accommodation_code": "BAMB",
+    "departure_date": "2026-11-29",
+    "duration_group": 8,
+    "pax": "4v2b",
+    "hotel": "Tenerife (BAMB)",
+    "destination": "Spania – Tenerife",
+    "meal_plan": null,
+    "stars": null,
+    "distance_to_beach": null,
+    "availability": 9,
+    "current_price": null,
+    "current_price_per_person": 3445,
+    "brochure_price": null,
+    "discount": null,
+    "reasons": [
+      "pp 3445 < 3500"
+    ],
+    "booking_url": "https://www.ving.no/restplass-hotell?SelectedDestCd=TFS&SelectedDepCd=OSL&QueryDepDate=20261129&QueryDur=8&QueryRoomAges=42,42,42,42,9,12&QueryUnits=1&SelectedHotCd=BAMB&QueryResID=4379&QueryCtryID=4328&QueryAreaID=4382&QueryDepID=12667&SelectedSerNo=71&price=20670",
+    "last_seen_at": "2026-10-13T17:33:52.595Z"
   },
   {
     "key": "ving|GUIA|2026-12-08|8|2v",
