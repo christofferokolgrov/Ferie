@@ -28,6 +28,7 @@
   "apollo|ESPRILUF01|2026-12-12|7|2v2b",
   "apollo|ESPTUFER01|2026-12-06|7|4v2b",
   "apollo|ESPTUTEN01|2026-12-06|7|4v2b",
+  "apollo|ESPTUTEN01|2026-12-13|7|4v2b",
   "apollo|ESSAVATH01|2026-11-29|7|2v2b",
   "apollo|ESSAVATH01|2026-12-06|7|2v2b",
   "apollo|ESSAVATH01|2026-12-13|7|2v2b",
@@ -130,5 +131,8 @@
   "ving|OLYM|2026-12-02|8|2v",
   "ving|OLYM|2026-12-02|8|4v",
   "ving|OLYM|2026-12-02|8|4v2b",
-  "ving|PHIL|2026-09-07|8|2v"
+  "ving|PHIL|2026-09-07|8|2v",
+  "ving|TEMA|2026-12-06|8|2v",
+  "ving|TEMA|2026-12-06|8|4v",
+  "ving|TEMA|2026-12-06|8|4v2b"
 ]
